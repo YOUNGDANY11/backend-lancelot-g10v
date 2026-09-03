@@ -16,7 +16,7 @@ export class UsersService {
   ){}
 
   async findOneById(id_user:number){
-    const user = await this.usersRepository.findOne({where:{id_user}, relations:{role:true}})
+    const user = await this.usersRepository.findOne({where:{id_user}, relations:{role:true, athletesInCategory:true}})
     return user
   }
 
@@ -32,6 +32,7 @@ export class UsersService {
 
     const query = this.usersRepository
     .createQueryBuilder('user')
+    .leftJoinAndSelect('user.athletesInCategory','athletes_in_categories')
     .leftJoinAndSelect('user.role','role')
     .skip(skip)
     .take(limit)

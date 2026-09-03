@@ -10,9 +10,6 @@ export class User {
     @Column({nullable:false})
     id_role:number
 
-    @Column({nullable:true})
-    id_ath_cat:number
-
     @Column({nullable:false,length:100})
     name:string
 
@@ -36,6 +33,6 @@ export class User {
     role:Role
     
     @OneToMany(() => AthletesInCategory, athletesInCategory => athletesInCategory.user)
-    @JoinColumn({name:'id_ath_cat'})
+    @JoinColumn({name:'id_user'})
     athletesInCategory:AthletesInCategory[]
 }

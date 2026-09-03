@@ -8,6 +8,10 @@ export class ResponseUserDto{
     id_role:number
 
     @Expose()
+    @Transform(({obj}) => obj.athletesInCategory?.map(ath => ath.id_ath_cat) ?? [])
+    id_ath_cat:number
+
+    @Expose()
     name:string
 
     @Expose()
