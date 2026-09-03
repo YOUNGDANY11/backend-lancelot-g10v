@@ -15,11 +15,7 @@ import { AthletesInCategoriesModule } from './athletes_in_categories/athletes_in
       inject:[ConfigService],
       useFactory:(configService:ConfigService) => ({
         type:'postgres',
-        host:'localhost',
-        database:'vera',
-        username:'vera',
-        password:'1234',
-        port:5432,
+        url:configService.get<string>('URL_DB'),
         synchronize:true,
         autoLoadEntities:true
       })
