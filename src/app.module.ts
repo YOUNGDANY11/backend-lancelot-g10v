@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
 import { AthletesInCategoriesModule } from './athletes_in_categories/athletes_in_categories.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { AthletesInCategoriesModule } from './athletes_in_categories/athletes_in
         synchronize:true,
         autoLoadEntities:true
       })
-    }), UsersModule, AuthModule, RolesModule, AthletesInCategoriesModule
+    }), UsersModule, AuthModule, RolesModule, AthletesInCategoriesModule, CategoriesModule
   ],
   controllers: [],
   providers: [],

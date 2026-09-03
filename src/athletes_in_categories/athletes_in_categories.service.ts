@@ -30,7 +30,7 @@ export class AthletesInCategoriesService {
   }
 
   async findAll(filters: FilterAthInCat) {
-    const { page = 1, limit = 10, name, lastname } = filters
+    const { page = 1, limit = 10, name, lastname, id_category } = filters
 
     const skip = (page - 1) * limit
 
@@ -38,6 +38,8 @@ export class AthletesInCategoriesService {
       .createQueryBuilder('athlete_in_category')
       .leftJoin('athlete_in_category.user', 'user')
       .addSelect(['user.id_user', 'user.name', 'user.lastname'])
+      .leftJoin('athlete_in_category.category', 'category')
+      .addSelect(['category.id_category', 'category.name']) 
       .skip(skip)
       .take(limit)
       .orderBy('user.id_user', 'ASC')
@@ -48,6 +50,10 @@ export class AthletesInCategoriesService {
 
     if (lastname) {
       query.andWhere('user.lastname ILIKE :lastname', { lastname: `%${lastname}%` })
+    }
+
+    if (id_category) {
+      query.andWhere('athlete_in_category.id_category = :id_category', { id_category })
     }
 
     const [athInCat, total] = await query.getManyAndCount()
@@ -95,7 +101,8 @@ export class AthletesInCategoriesService {
     const existUser= await this.usersService.findOneById(createAthletesInCategoryDto.id_user)
     if(!existUser) throw new BadRequestException({status:'Error',mensaje:'No existe este usuario'})
     if(existUser && existUser.id_role !== 3) throw new BadRequestException({status:'Error',mensaje:'Este usuario no es un deportista'})
-    
+    const existAthInCat = await this.athInCatRepository.findOne({ where: { id_user: createAthletesInCategoryDto.id_user, id_category: createAthletesInCategoryDto.id_category, },})
+    if(existAthInCat) throw new BadRequestException({status:'Error',mensaje:'Este deportista ya esta en esta categoria'})
     const athInCat = await this.athInCatRepository.save(createAthletesInCategoryDto)
     return{
       status:'Success',
@@ -107,6 +114,8 @@ export class AthletesInCategoriesService {
   async update(id_ath_cat:number,updateAthletesInCategoryDto:UpdateAthletesInCategoryDto){
     const existsAthInCat = await this.findOneById(id_ath_cat)
     if(!existsAthInCat) throw new NotFoundException({status:'Error',mensaje:'No existe este deportista en categoria'})
+    const existAthInCat = await this.athInCatRepository.findOne({ where: { id_user: updateAthletesInCategoryDto.id_user, id_category: updateAthletesInCategoryDto.id_category, },})
+    if(existAthInCat) throw new BadRequestException({status:'Error',mensaje:'Este deportista ya esta en esta categoria'})
     const athInCat = await this.athInCatRepository.merge(existsAthInCat,updateAthletesInCategoryDto)
     await this.athInCatRepository.save(athInCat)
     return{

@@ -39,7 +39,7 @@ export class AthletesInCategoriesController {
 
   @Roles('ADMIN','ENTRENADOR')
   @Put('id/:id')
-  update(@Param('id',ParseIntPipe) id_ath_cat:number, updateAthletesInCategoryDto:UpdateAthletesInCategoryDto){
+  update(@Param('id',ParseIntPipe) id_ath_cat:number, @Body() updateAthletesInCategoryDto:UpdateAthletesInCategoryDto){
     return this.athletesInCategoriesService.update(id_ath_cat,updateAthletesInCategoryDto)
   }
 

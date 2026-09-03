@@ -8,6 +8,14 @@ export class ResponseAthInCat{
     id_ath_cat:number
 
     @Expose()
+    @Transform(({obj}) => obj.category?.id_category)
+    id_category:number
+
+    @Expose()
+    @Transform(({obj}) => obj.category?.name)
+    category_name:string
+
+    @Expose()
     @Transform(({obj}) => obj.user?.name)
     name:string
 

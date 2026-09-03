@@ -1,3 +1,4 @@
+import { Category } from "src/categories/entities/category.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -21,4 +22,8 @@ export class AthletesInCategory {
     @ManyToOne(() => User, user => user.athletesInCategory)
     @JoinColumn({name:'id_user'})
     user:User
+
+    @ManyToOne(() => Category, category => category.athletesInCategory)
+    @JoinColumn({name:'id_category'})
+    category:Category
 }
