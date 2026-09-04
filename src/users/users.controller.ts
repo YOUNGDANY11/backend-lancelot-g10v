@@ -55,10 +55,10 @@ export class UsersController {
 
 
   @Roles('ADMIN','ENTRENADOR')
-  @Put('me/:id')
+  @Put('me')
   @ApiOperation({ summary: 'Actualizar mi perfil', description: 'El usuario se obtiene del JWT. La ruta actual contiene `:id`, pero la implementación no lo utiliza; requiere rol ADMIN o ENTRENADOR.' }) @ApiParam({ name: 'id', type: Number, example: 1, description: 'Parámetro exigido por la ruta actual; no es usado por el controlador.' }) @ApiOkResponse({ type: UserResponseDto })
   updateMe(@GetUser('id_user') id_user:number, @Body() updateUserDto:UpdateUserDto){
-    return this.usersService.update(id_user,UpdateUserDto)
+    return this.usersService.update(id_user,updateUserDto)
   }
 
   @Roles('ADMIN')

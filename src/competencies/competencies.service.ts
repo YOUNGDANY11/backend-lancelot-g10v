@@ -23,7 +23,7 @@ export class CompetenciesService {
 
     const query = this.competencyRepository
       .createQueryBuilder('competency')
-      .addSelect(['competency.id_competency', 'competency.name', 'competency.current_year','competency.min_age','competency.max_age'])
+      .addSelect(['competency.id_competency', 'competency.name', 'competency.current_year','competency.start_date','competency.finish_date'])
       .skip(skip)
       .take(limit)
       .orderBy('competency.id_competency', 'ASC')
@@ -76,34 +76,34 @@ export class CompetenciesService {
   }
 
   async create(createCompetencyDto:CreateCompetencyDto){
-    const category = await this.competencyRepository.save(createCompetencyDto)
+    const competency = await this.competencyRepository.save(createCompetencyDto)
     return{
       status:'Success',
       mensaje:'Creacion de competencia exitosa',
-      category
+      competency
     }
   }
 
   async update(id_competency:number, updateCompetencyDto:UpdateCompetencyDto){
-    const existsCategory = await this.findOneById(id_competency)
-    if(!existsCategory) throw new NotFoundException({status:'Error',mensaje:'No existe esta competencia'})
-    const category = await this.competencyRepository.merge(existsCategory,updateCompetencyDto)
-    await this.competencyRepository.save(category)
+    const existsCompetency = await this.findOneById(id_competency)
+    if(!existsCompetency) throw new NotFoundException({status:'Error',mensaje:'No existe esta competencia'})
+    const competency = await this.competencyRepository.merge(existsCompetency,updateCompetencyDto)
+    await this.competencyRepository.save(competency)
     return{
       status:'Success',
       mensaje:'competencia actualizada con exito',
-      category
+      competency
     }
   }
 
   async delete(id_competency:number){
-    const category = await this.findOneById(id_competency)
-    if(!category) throw new NotFoundException({status:'Error',mensaje:'No existe esta competencia'})
-    await this.competencyRepository.remove(category)
+    const competency = await this.findOneById(id_competency)
+    if(!competency) throw new NotFoundException({status:'Error',mensaje:'No existe esta competencia'})
+    await this.competencyRepository.remove(competency)
     return{
       status:'Success',
       mensaje:'competencia eliminada con exito',
-      category
+      competency
     }
   }
     

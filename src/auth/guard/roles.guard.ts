@@ -17,7 +17,7 @@ export class RolesGuard implements CanActivate{
         }
 
         if(id_role === 3){
-            return 'JUGADOR'
+            return 'DEPORTISTA'
         }
     }
 
