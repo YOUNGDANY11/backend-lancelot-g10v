@@ -1,36 +1,37 @@
 import { Type } from "class-transformer";
 import { IsInt, IsOptional, IsString, Min } from "class-validator";
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FilterCategory{
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
-    page?:number = 1
+    @ApiPropertyOptional({ example: 1, minimum: 1, default: 1 }) page?:number = 1
 
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
-    limit?:number = 10
+    @ApiPropertyOptional({ example: 10, minimum: 1, default: 10 }) limit?:number = 10
     
     @IsOptional()
     @IsString()
-    name?:string
+    @ApiPropertyOptional({ description: 'Texto a buscar en el nombre.', example: 'Sub' }) name?:string
 
     @IsOptional()
     @Type(() => Number)
     @IsInt()
-    current_year?:number
+    @ApiPropertyOptional({ example: 2026 }) current_year?:number
 
     @IsOptional()
     @Type(() => Number)
     @IsInt()
-    min_age?:number
+    @ApiPropertyOptional({ example: 13 }) min_age?:number
 
     @IsOptional()
     @Type(() => Number)
     @IsInt()
-    max_age?:number
+    @ApiPropertyOptional({ example: 15 }) max_age?:number
    
 }

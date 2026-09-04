@@ -1,33 +1,34 @@
 import { Type } from "class-transformer";
 import { IsInt, IsOptional, IsString, Min } from "class-validator";
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FilterAthInCat{
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
-    page?:number = 1
+    @ApiPropertyOptional({ example: 1, minimum: 1, default: 1 }) page?:number = 1
 
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
-    limit?:number = 10
+    @ApiPropertyOptional({ example: 10, minimum: 1, default: 10 }) limit?:number = 10
 
     @IsOptional()
     @Type(() => Number)
     @IsInt()
-    id_category?:number
+    @ApiPropertyOptional({ example: 2 }) id_category?:number
 
     @IsOptional()
     @IsString()
-    name?:string
+    @ApiPropertyOptional({ example: 'Juan' }) name?:string
 
     @IsOptional()
     @IsString()
-    lastname?:string
+    @ApiPropertyOptional({ example: 'Pérez' }) lastname?:string
 
     @IsOptional()
     @IsString()
-    category_name?:string
+    @ApiPropertyOptional({ example: 'Sub-15' }) category_name?:string
 }

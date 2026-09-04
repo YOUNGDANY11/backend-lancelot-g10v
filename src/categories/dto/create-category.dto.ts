@@ -1,25 +1,26 @@
 import { Type } from "class-transformer";
 import { IsInt, IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCategoryDto {
     @IsString()
     @IsNotEmpty()
-    name:string
+    @ApiProperty({ description: 'Nombre de la categoría.', example: 'Sub-15' }) name:string
     
     @IsNotEmpty()
     @Type(() => Number)
     @IsInt()
-    min_age:number
+    @ApiProperty({ description: 'Edad mínima permitida.', example: 13 }) min_age:number
     
     @IsNotEmpty()
     @Type(() => Number)
     @IsInt()
-    max_age:number
+    @ApiProperty({ description: 'Edad máxima permitida.', example: 15 }) max_age:number
     
     @IsNotEmpty()
     @Type(() => Number)
     @IsInt()
-    current_year:number
+    @ApiProperty({ description: 'Año de vigencia.', example: 2026 }) current_year:number
 
 
 }

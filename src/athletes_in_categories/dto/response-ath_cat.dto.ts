@@ -1,31 +1,32 @@
 import { Expose, Transform } from "class-transformer";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ResponseAthInCat{
     @Expose()
-    id_user:number
+    @ApiProperty({ example: 7 }) id_user:number
 
     @Expose()
-    id_ath_cat:number
+    @ApiProperty({ example: 4 }) id_ath_cat:number
 
     @Expose()
     @Transform(({obj}) => obj.category?.id_category)
-    id_category:number
+    @ApiProperty({ example: 2 }) id_category:number
 
     @Expose()
     @Transform(({obj}) => obj.category?.name)
-    category_name:string
+    @ApiProperty({ example: 'Sub-15' }) category_name:string
 
     @Expose()
     @Transform(({obj}) => obj.user?.name)
-    name:string
+    @ApiProperty({ example: 'Juan' }) name:string
 
     @Expose()
     @Transform(({obj}) => obj.user?.lastname)
-    lastname:string
+    @ApiProperty({ example: 'Pérez' }) lastname:string
 
     @Expose()
-    created_at:Date
+    @ApiProperty({ type: String, format: 'date-time' }) created_at:Date
 
     @Expose()
-    updated_at:Date
+    @ApiProperty({ type: String, format: 'date-time' }) updated_at:Date
 }
