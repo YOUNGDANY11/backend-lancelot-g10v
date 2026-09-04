@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
-import { IsInt, IsOptional, IsString, Min } from "class-validator";
+import { IsDate, IsInt, IsOptional, IsString, Min } from "class-validator";
 
-export class FilterAthInCat{
+export class FilterCompetency{
     @IsOptional()
     @Type(() => Number)
     @IsInt()
@@ -13,21 +13,25 @@ export class FilterAthInCat{
     @IsInt()
     @Min(1)
     limit?:number = 10
-
-    @IsOptional()
-    @Type(() => Number)
-    @IsInt()
-    id_category?:number
-
+    
     @IsOptional()
     @IsString()
     name?:string
 
     @IsOptional()
-    @IsString()
-    lastname?:string
+    @Type(() => Number)
+    @IsInt()
+    current_year?:number
 
     @IsOptional()
-    @IsString()
-    category_name?:string
+    @Type(() => Date)
+    @IsDate()
+    start_date?:Date
+
+    @IsOptional()
+    @Type(() => Date)
+    @IsDate()
+    finish_date?:Date
+
+   
 }

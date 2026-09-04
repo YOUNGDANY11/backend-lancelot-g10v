@@ -1,4 +1,5 @@
 import { AthletesInCategory } from "src/athletes_in_categories/entities/athletes_in_category.entity";
+import { AthletesInCompetency } from "src/athletes_in_competencies/entities/athletes_in_competency.entity";
 import { Role } from "src/roles/entities/role.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -35,4 +36,8 @@ export class User {
     @OneToMany(() => AthletesInCategory, athletesInCategory => athletesInCategory.user)
     @JoinColumn({name:'id_user'})
     athletesInCategory:AthletesInCategory[]
+
+    @OneToMany(() => AthletesInCompetency, athletesInCompetency => athletesInCompetency.user)
+    @JoinColumn({name:'id_user'})
+    athletesInCompetency:AthletesInCompetency[]
 }

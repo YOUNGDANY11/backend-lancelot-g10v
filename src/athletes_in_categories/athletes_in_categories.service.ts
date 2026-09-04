@@ -30,7 +30,7 @@ export class AthletesInCategoriesService {
   }
 
   async findAll(filters: FilterAthInCat) {
-    const { page = 1, limit = 10, name, lastname, id_category } = filters
+    const { page = 1, limit = 10, name, lastname, id_category, category_name } = filters
 
     const skip = (page - 1) * limit
 
@@ -54,6 +54,10 @@ export class AthletesInCategoriesService {
 
     if (id_category) {
       query.andWhere('athlete_in_category.id_category = :id_category', { id_category })
+    }
+
+    if (category_name) {
+      query.andWhere('category.name ILIKE :category_name', { category_name: `%${category_name}%` })
     }
 
     const [athInCat, total] = await query.getManyAndCount()

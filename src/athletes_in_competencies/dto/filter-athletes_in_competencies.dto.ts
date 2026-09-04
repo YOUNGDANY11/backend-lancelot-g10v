@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import { IsInt, IsOptional, IsString, Min } from "class-validator";
 
-export class FilterAthInCat{
+export class FilterAthInComp{
     @IsOptional()
     @Type(() => Number)
     @IsInt()
@@ -17,7 +17,7 @@ export class FilterAthInCat{
     @IsOptional()
     @Type(() => Number)
     @IsInt()
-    id_category?:number
+    id_competency?:number
 
     @IsOptional()
     @IsString()
@@ -29,5 +29,5 @@ export class FilterAthInCat{
 
     @IsOptional()
     @IsString()
-    category_name?:string
+    competency_name?:string
 }
