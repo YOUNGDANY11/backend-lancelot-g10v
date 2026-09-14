@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { CreateMatchDto } from './dto/create-match.dto'
 import { UpdateMatchDto } from './dto/update-match.dto'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -13,18 +17,29 @@ import { CompetenciesService } from 'src/competencies/competencies.service'
 @Injectable()
 export class MatchesService {
   constructor(
-    @InjectRepository(Match) private matchRepository:Repository<Match>,
-    private readonly categoriesService:CategoriesService,
-    private readonly competenciesService:CompetenciesService
-  ){}
+    @InjectRepository(Match) private matchRepository: Repository<Match>,
+    private readonly categoriesService: CategoriesService,
+    private readonly competenciesService: CompetenciesService,
+  ) {}
 
-  async findOneById(id_match:number){
-    const match = await this.matchRepository.findOne({where:{id_match}, relations:{competency:true,category:true}})
+  async findOneById(id_match: number) {
+    const match = await this.matchRepository.findOne({
+      where: { id_match },
+      relations: { competency: true, category: true },
+    })
     return match
   }
 
   async findAll(filters: FilterMatchDto) {
-    const { page = 1, limit = 10, id_category, id_competency, name_category, name_competency, location } = filters
+    const {
+      page = 1,
+      limit = 10,
+      id_category,
+      id_competency,
+      name_category,
+      name_competency,
+      location,
+    } = filters
 
     const skip = (page - 1) * limit
 
@@ -76,7 +91,9 @@ export class MatchesService {
     return {
       status: 'Success',
       mensaje: 'Consulta de partidos exitosa',
-      matches: plainToInstance(ResponseMatchDto, matches, {excludeExtraneousValues:true}),
+      matches: plainToInstance(ResponseMatchDto, matches, {
+        excludeExtraneousValues: true,
+      }),
       pagination: {
         total,
         page,
@@ -86,57 +103,99 @@ export class MatchesService {
     }
   }
 
-  async getById(id_match:number){
+  async getById(id_match: number) {
     const match = await this.findOneById(id_match)
-    if(!match) throw new NotFoundException({status:'Error',mensaje:'No existe este partido'})
+    if (!match)
+      throw new NotFoundException({
+        status: 'Error',
+        mensaje: 'No existe este partido',
+      })
     return {
-      status:'Success',
-      mensaje:'Consulta de partido exitosa',
-      match: plainToInstance(ResponseMatchDto,match, {excludeExtraneousValues:true})
+      status: 'Success',
+      mensaje: 'Consulta de partido exitosa',
+      match: plainToInstance(ResponseMatchDto, match, {
+        excludeExtraneousValues: true,
+      }),
     }
   }
 
-  async create(createMatchDto:CreateMatchDto){
-    const existsCompetency = await this.competenciesService.getById(createMatchDto.id_competency)
-    if(!existsCompetency) throw new NotFoundException({status:'Error',mensaje:'No existe esta competencia'})
-    const existsCategory = await this.categoriesService.getById(createMatchDto.id_category)
-    if(!existsCategory) throw new NotFoundException({status:'Error', mensaje:'No existe esta categoria'})
+  async create(createMatchDto: CreateMatchDto) {
+    const existsCompetency = await this.competenciesService.getById(
+      createMatchDto.id_competency,
+    )
+    if (!existsCompetency)
+      throw new NotFoundException({
+        status: 'Error',
+        mensaje: 'No existe esta competencia',
+      })
+    const existsCategory = await this.categoriesService.getById(
+      createMatchDto.id_category,
+    )
+    if (!existsCategory)
+      throw new NotFoundException({
+        status: 'Error',
+        mensaje: 'No existe esta categoria',
+      })
     const match = await this.matchRepository.save(createMatchDto)
     return {
-      status:'Success',
-      mensaje:'Partido creado con exito',
-      match: plainToInstance(ResponseMatchDto, match, {excludeExtraneousValues:true})
+      status: 'Success',
+      mensaje: 'Partido creado con exito',
+      match: plainToInstance(ResponseMatchDto, match, {
+        excludeExtraneousValues: true,
+      }),
     }
   }
 
-  async update(id_match:number,updateMatchDto:UpdateMatchDto){
+  async update(id_match: number, updateMatchDto: UpdateMatchDto) {
     const existsMatch = await this.findOneById(id_match)
-    if(!existsMatch) throw new NotFoundException({status:'Error',mensaje:'No existe este partido'})
-    if(updateMatchDto.id_competency) {
-      const existsCompetency = await this.competenciesService.getById(updateMatchDto.id_competency)
-      if(!existsCompetency) throw new NotFoundException({status:'Error', mensaje:'No existe esta competencia'})
+    if (!existsMatch)
+      throw new NotFoundException({
+        status: 'Error',
+        mensaje: 'No existe este partido',
+      })
+    if (updateMatchDto.id_competency) {
+      const existsCompetency = await this.competenciesService.getById(
+        updateMatchDto.id_competency,
+      )
+      if (!existsCompetency)
+        throw new NotFoundException({
+          status: 'Error',
+          mensaje: 'No existe esta competencia',
+        })
     }
-    if(updateMatchDto.id_category) {
-      const existsCategory = await this.categoriesService.getById(updateMatchDto.id_category)
-      if(!existsCategory) throw new NotFoundException({status:'Error', mensaje:'No existe esta categoria'})
+    if (updateMatchDto.id_category) {
+      const existsCategory = await this.categoriesService.getById(
+        updateMatchDto.id_category,
+      )
+      if (!existsCategory)
+        throw new NotFoundException({
+          status: 'Error',
+          mensaje: 'No existe esta categoria',
+        })
     }
 
-    const match = await this.matchRepository.merge(existsMatch,updateMatchDto)
+    const match = await this.matchRepository.merge(existsMatch, updateMatchDto)
     await this.matchRepository.save(match)
     return {
-      status:'Success',
-      mensaje:'Partido actualizado con exito',
-      match: plainToInstance(ResponseMatchDto,match,{excludeExtraneousValues:true})
+      status: 'Success',
+      mensaje: 'Partido actualizado con exito',
+      match: plainToInstance(ResponseMatchDto, match, {
+        excludeExtraneousValues: true,
+      }),
     }
   }
 
-  async delete(id_match:number){
+  async delete(id_match: number) {
     const match = await this.findOneById(id_match)
-    if(!match) throw new NotFoundException({status:'Error',mensaje:'No existe este partido'})
+    if (!match)
+      throw new NotFoundException({
+        status: 'Error',
+        mensaje: 'No existe este partido',
+      })
     await this.matchRepository.remove(match)
     return {
-      status:'Success',
-      mensaje:'Partido eliminado con exito'
+      status: 'Success',
+      mensaje: 'Partido eliminado con exito',
     }
   }
 }

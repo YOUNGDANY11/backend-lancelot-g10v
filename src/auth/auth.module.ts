@@ -1,27 +1,33 @@
-import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { UsersModule } from 'src/users/users.module';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { AuthStrategy } from './strategies/auth.strategy';
+import { Module } from '@nestjs/common'
+import { AuthService } from './auth.service'
+import { AuthController } from './auth.controller'
+import { UsersModule } from 'src/users/users.module'
+import { PassportModule } from '@nestjs/passport'
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
+import { TypeOrmModule } from '@nestjs/typeorm'
+import { AuthStrategy } from './strategies/auth.strategy'
+import { RefreshToken } from './entities/refresh-token.entity'
 
 @Module({
-  imports:[
+  imports: [
     UsersModule,
     PassportModule,
+    TypeOrmModule.forFeature([RefreshToken]),
     JwtModule.registerAsync({
-      inject:[ConfigService],
-      useFactory:(configService:ConfigService) : JwtModuleOptions => {
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService): JwtModuleOptions => {
         const secret = configService.get<string>('JWT_SECRET')
-        if(!secret) throw new Error('No esta registrada la JWT_SECRET en el .env')
-        return{
+        if (!secret)
+          throw new Error('No esta registrada la JWT_SECRET en el .env')
+        return {
           secret,
-          signOptions:{expiresIn:configService.get<string>('JWT_EXPIRES') as any}
+          signOptions: {
+            expiresIn: configService.get<string>('JWT_EXPIRES') as any,
+          },
         }
-      }
-    })
+      },
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthStrategy],
