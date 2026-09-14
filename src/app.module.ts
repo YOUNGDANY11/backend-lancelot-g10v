@@ -10,6 +10,7 @@ import { CategoriesModule } from './categories/categories.module'
 import { AthletesInCompetenciesModule } from './athletes_in_competencies/athletes_in_competencies.module'
 import { CompetenciesModule } from './competencies/competencies.module'
 import { MatchesModule } from './matches/matches.module'
+import { SeasonsModule } from './seasons/seasons.module'
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { MatchesModule } from './matches/matches.module'
     AthletesInCompetenciesModule,
     CompetenciesModule,
     MatchesModule,
+    SeasonsModule,
   ],
   controllers: [],
   providers: [],

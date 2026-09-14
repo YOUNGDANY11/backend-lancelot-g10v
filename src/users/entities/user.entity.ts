@@ -32,6 +32,9 @@ export class User {
   @Column({ nullable: false, length: 255 })
   password: string
 
+  @Column({ type: 'date', nullable: true })
+  birth_date?: string | null
+
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date
 

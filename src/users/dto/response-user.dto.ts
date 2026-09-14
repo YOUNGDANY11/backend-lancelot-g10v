@@ -35,6 +35,10 @@ export class ResponseUserDto {
   email: string
 
   @Expose()
+  @ApiProperty({ example: '2012-04-10', format: 'date', nullable: true })
+  birth_date?: string | null
+
+  @Expose()
   @Transform(({ obj }) => obj.role?.name)
   @ApiProperty({ example: 'JUGADOR' })
   role_name: string
