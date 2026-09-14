@@ -2,12 +2,13 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AuthService } from './auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiOperation, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { UserResponseDto } from 'src/common/dto/api-response.dto';
 
 @Controller('auth')
 @ApiTags('Autenticación')
+@ApiInternalServerErrorResponse({ description: 'Error interno no controlado.' })
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

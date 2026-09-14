@@ -7,7 +7,7 @@ import { JwtAuthGuard } from 'src/auth/guard/jwt-guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { UserResponseDto, UsersPaginatedResponseDto } from 'src/common/dto/api-response.dto';
 
 
@@ -15,6 +15,7 @@ import { UserResponseDto, UsersPaginatedResponseDto } from 'src/common/dto/api-r
 @ApiTags('Usuarios')
 @ApiBearerAuth('bearerAuth')
 @ApiUnauthorizedResponse({ description: 'JWT ausente, inválido o expirado.' })
+@ApiInternalServerErrorResponse({ description: 'Error interno no controlado.' })
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -56,7 +57,7 @@ export class UsersController {
 
   @Roles('ADMIN','ENTRENADOR')
   @Put('me')
-  @ApiOperation({ summary: 'Actualizar mi perfil', description: 'El usuario se obtiene del JWT. La ruta actual contiene `:id`, pero la implementación no lo utiliza; requiere rol ADMIN o ENTRENADOR.' }) @ApiParam({ name: 'id', type: Number, example: 1, description: 'Parámetro exigido por la ruta actual; no es usado por el controlador.' }) @ApiOkResponse({ type: UserResponseDto })
+  @ApiOperation({ summary: 'Actualizar mi perfil', description: 'El usuario se obtiene del JWT; requiere rol ADMIN o ENTRENADOR.' }) @ApiOkResponse({ type: UserResponseDto }) @ApiBadRequestResponse({ description: 'El correo ya está en uso o el cuerpo no es válido.' }) @ApiNotFoundResponse({ description: 'El usuario autenticado no existe.' })
   updateMe(@GetUser('id_user') id_user:number, @Body() updateUserDto:UpdateUserDto){
     return this.usersService.update(id_user,updateUserDto)
   }

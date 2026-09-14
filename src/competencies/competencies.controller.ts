@@ -6,13 +6,14 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { FilterCompetency } from './dto/filter-competency.dto';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { CompetenciesPaginatedResponseDto, CompetencyMutationResponseDto, CompetencyResponseDto } from 'src/common/dto/api-response.dto';
 
 @UseGuards(JwtAuthGuard,RolesGuard)
 @ApiTags('Competencias')
 @ApiBearerAuth('bearerAuth')
 @ApiUnauthorizedResponse({ description: 'JWT ausente, inválido o expirado.' })
+@ApiInternalServerErrorResponse({ description: 'Error interno no controlado.' })
 @Controller('competencies')
 export class CompetenciesController {
   constructor(private readonly competenciesService: CompetenciesService) {}

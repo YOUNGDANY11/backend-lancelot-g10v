@@ -7,12 +7,13 @@ import { JwtAuthGuard } from 'src/auth/guard/jwt-guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { AthleteInCategoryResponseDto, AthletesInCategoriesPaginatedResponseDto, MessageResponseDto } from 'src/common/dto/api-response.dto';
 
 @UseGuards(JwtAuthGuard,RolesGuard)
 @ApiTags('Asignaciones a categorías') @ApiBearerAuth('bearerAuth')
 @ApiUnauthorizedResponse({ description: 'JWT ausente, inválido o expirado.' })
+@ApiInternalServerErrorResponse({ description: 'Error interno no controlado.' })
 @Controller('athletes-in-categories')
 export class AthletesInCategoriesController {
   constructor(private readonly athletesInCategoriesService: AthletesInCategoriesService) {}

@@ -6,13 +6,14 @@ import { FilterAthInComp } from './dto/filter-athletes_in_competencies.dto';
 import { GetUser } from 'src/auth/decorators/get-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-guard';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiInternalServerErrorResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { AthleteInCompetencyResponseDto, AthleteInCompetencyUpdateResponseDto, AthletesInCompetenciesPaginatedResponseDto, MessageResponseDto } from 'src/common/dto/api-response.dto';
 
 
 @UseGuards(JwtAuthGuard,RolesGuard)
 @ApiTags('Asignaciones a competencias') @ApiBearerAuth('bearerAuth')
 @ApiUnauthorizedResponse({ description: 'JWT ausente, inválido o expirado.' })
+@ApiInternalServerErrorResponse({ description: 'Error interno no controlado.' })
 @Controller('athletes-in-competencies')
 export class AthletesInCompetenciesController {
   constructor(private readonly athletesInCompetenciesService: AthletesInCompetenciesService) {}

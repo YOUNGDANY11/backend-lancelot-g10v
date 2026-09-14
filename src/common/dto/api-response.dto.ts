@@ -5,6 +5,7 @@ import { ResponseCompetencyDto } from '../../competencies/dto/response-competenc
 import { ResponseAthInCat } from '../../athletes_in_categories/dto/response-ath_cat.dto';
 import { ResponseAthInComp } from '../../athletes_in_competencies/dto/response-athletes_in_competency.dto';
 import { PaginationDto } from './pagination.dto';
+import { ResponseMatchDto } from '../../matches/dto/response-match.dto';
 
 export class MessageResponseDto { @ApiProperty({ example: 'Success' }) status: string; @ApiProperty({ example: 'Operación realizada con éxito.' }) mensaje: string; }
 export class UserResponseDto extends MessageResponseDto { @ApiProperty({ type: ResponseUserDto }) user: ResponseUserDto; }
@@ -19,3 +20,5 @@ export class AthletesInCategoriesPaginatedResponseDto extends MessageResponseDto
 export class AthleteInCompetencyResponseDto extends MessageResponseDto { @ApiProperty({ type: ResponseAthInComp }) athInComp: ResponseAthInComp; }
 export class AthleteInCompetencyUpdateResponseDto extends MessageResponseDto { @ApiProperty({ type: ResponseAthInComp, description: 'La implementación actual devuelve esta propiedad con el nombre `athInCat`.' }) athInCat: ResponseAthInComp; }
 export class AthletesInCompetenciesPaginatedResponseDto extends MessageResponseDto { @ApiProperty({ type: ResponseAthInComp, isArray: true, description: 'La implementación actual devuelve esta propiedad con el nombre `athInCat`.' }) athInCat: ResponseAthInComp[]; @ApiProperty({ type: PaginationDto }) pagination: PaginationDto; }
+export class MatchResponseDto extends MessageResponseDto { @ApiProperty({ type: ResponseMatchDto }) match: ResponseMatchDto; }
+export class MatchesPaginatedResponseDto extends MessageResponseDto { @ApiProperty({ type: ResponseMatchDto, isArray: true }) matches: ResponseMatchDto[]; @ApiProperty({ type: PaginationDto }) pagination: PaginationDto; }

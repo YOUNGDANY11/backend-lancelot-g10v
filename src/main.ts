@@ -20,6 +20,7 @@ async function bootstrap() {
     .addTag('Competencias')
     .addTag('Asignaciones a categorías')
     .addTag('Asignaciones a competencias')
+    .addTag('Partidos')
     .addTag('Roles')
     .addBearerAuth({
       type: 'http',

@@ -19,23 +19,23 @@ export class FilterMatchDto{
     @Type(() => Number)
     @IsInt()
     @Min(1)
-    @ApiPropertyOptional({example: 1 }) id_category?:number
+    @ApiPropertyOptional({ description: 'Identificador exacto de la categoría.', example: 2, minimum: 1 }) id_category?:number
 
     @IsOptional()
     @Type(() => Number)
     @IsInt()
     @Min(1)
-    @ApiPropertyOptional({example: 1 }) id_competency?:number
+    @ApiPropertyOptional({ description: 'Identificador exacto de la competencia.', example: 1, minimum: 1 }) id_competency?:number
 
     @IsOptional()
     @IsString()
-    @ApiPropertyOptional({ description: 'Texto a buscar nombre de la categoria.', example: 'SUB-20' }) name_category?:string
+    @ApiPropertyOptional({ description: 'Texto parcial a buscar en el nombre de la categoría.', example: 'SUB-20' }) name_category?:string
 
     @IsOptional()
     @IsString()
-    @ApiPropertyOptional({ description: 'Texto a buscar nombre de la competencia.', example: 'LIGA DE BOGOTA' }) name_competency?:string
+    @ApiPropertyOptional({ description: 'Texto parcial a buscar en el nombre de la competencia.', example: 'LIGA DE BOGOTA' }) name_competency?:string
 
     @IsOptional()
     @IsString()
-    @ApiPropertyOptional({ description: 'Texto a buscar locasion del partido.', example: 'Cayetano' }) location?:string
+    @ApiPropertyOptional({ description: 'Texto parcial a buscar en la ubicación del partido.', example: 'Cayetano' }) location?:string
 }
