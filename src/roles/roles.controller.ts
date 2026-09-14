@@ -1,15 +1,10 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, } from '@nestjs/common'
 import { RolesService } from './roles.service'
 import { CreateRoleDto } from './dto/create-role.dto'
 import { UpdateRoleDto } from './dto/update-role.dto'
+import { Roles } from 'src/auth/decorators/roles.decorator'
+import { JwtAuthGuard } from 'src/auth/guard/jwt-guard'
+import { RolesGuard } from 'src/auth/guard/roles.guard'
 import {
   ApiBody,
   ApiInternalServerErrorResponse,
@@ -19,12 +14,14 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('roles')
 @ApiTags('Roles')
 @ApiInternalServerErrorResponse({ description: 'Error interno no controlado.' })
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
+  @Roles('ADMIN')
   @Post()
   @ApiOperation({
     summary: 'Crear rol',
@@ -37,6 +34,7 @@ export class RolesController {
     return this.rolesService.create(createRoleDto)
   }
 
+  @Roles('ADMIN')
   @Get()
   @ApiOperation({
     summary: 'Listar roles',
@@ -47,6 +45,7 @@ export class RolesController {
     return this.rolesService.findAll()
   }
 
+  @Roles('ADMIN')
   @Get(':id')
   @ApiOperation({
     summary: 'Consultar rol',
@@ -58,6 +57,7 @@ export class RolesController {
     return this.rolesService.findOne(+id)
   }
 
+  @Roles('ADMIN')
   @Patch(':id')
   @ApiOperation({
     summary: 'Actualizar rol',
@@ -71,6 +71,7 @@ export class RolesController {
     return this.rolesService.update(+id, updateRoleDto)
   }
 
+  @Roles('ADMIN')
   @Delete(':id')
   @ApiOperation({
     summary: 'Eliminar rol',
