@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class ResponseCompetencyDto {
   @ApiProperty({ example: 1 }) id_competency: number
+  @ApiProperty({ example: 23 }) id_category: number
   @ApiProperty({ example: 'Torneo regional' }) name: string
   @ApiPropertyOptional({ example: 'Competencia regional anual.' })
   description?: string

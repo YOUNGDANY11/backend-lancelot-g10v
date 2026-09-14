@@ -3,6 +3,14 @@ import { IsDate, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class CreateCompetencyDto {
+  @Type(() => Number)
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'Id de la categoria.',
+    example: 23,
+  })
+  id_category: number
+
   @IsString()
   @IsNotEmpty()
   @ApiProperty({

@@ -1,4 +1,5 @@
 import { AthletesInCategory } from 'src/athletes_in_categories/entities/athletes_in_category.entity'
+import { Competency } from 'src/competencies/entities/competency.entity'
 import { Match } from 'src/matches/entities/match.entity'
 import {
   Column,
@@ -6,6 +7,7 @@ import {
   Entity,
   JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
@@ -42,4 +44,7 @@ export class Category {
 
   @OneToMany(() => Match, (match) => match.category)
   match: Match[]
+
+  @OneToOne(() => Competency, (competency) => competency.category)
+  competency: Competency
 }

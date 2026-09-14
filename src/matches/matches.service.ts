@@ -136,7 +136,10 @@ export class MatchesService {
         status: 'Error',
         mensaje: 'No existe esta categoria',
       })
-    const match = await this.matchRepository.save(createMatchDto)
+    const match = await this.matchRepository.save({
+      ...createMatchDto,
+      id_category: existsCompetency.competency.id_category,
+    })
     return {
       status: 'Success',
       mensaje: 'Partido creado con exito',
