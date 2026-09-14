@@ -1,4 +1,5 @@
 import { AthletesInCompetency } from "src/athletes_in_competencies/entities/athletes_in_competency.entity";
+import { Match } from "src/matches/entities/match.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('competencies')
@@ -30,4 +31,7 @@ export class Competency {
     @OneToMany(() => AthletesInCompetency, athletesInCompetencyc => athletesInCompetencyc.competency)
     @JoinColumn({name:'id_competency'})
     athletesInCompetencyc: AthletesInCompetency[]
+
+    @OneToMany(() => Match, match => match.competency)
+    match:Match[]
 }

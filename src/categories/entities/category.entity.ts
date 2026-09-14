@@ -1,4 +1,5 @@
 import { AthletesInCategory } from "src/athletes_in_categories/entities/athletes_in_category.entity";
+import { Match } from "src/matches/entities/match.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity('categories')
@@ -27,4 +28,7 @@ export class Category {
     @OneToMany(() => AthletesInCategory, athletesInCategory => athletesInCategory.category)
     @JoinColumn({name:'id_category'})
     athletesInCategory:AthletesInCategory[]
+
+    @OneToMany(() => Match, match => match.category)
+    match:Match[]
 }
