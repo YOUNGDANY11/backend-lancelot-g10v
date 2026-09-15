@@ -12,6 +12,7 @@ import { CompetenciesModule } from './competencies/competencies.module'
 import { MatchesModule } from './matches/matches.module'
 import { SeasonsModule } from './seasons/seasons.module'
 import { PhysicalEvaluationsModule } from './physical_evaluations/physical-evaluations.module'
+import { TechnicalEvaluationsModule } from './technical_evaluations/technical-evaluations.module'
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { PhysicalEvaluationsModule } from './physical_evaluations/physical-evalu
     MatchesModule,
     SeasonsModule,
     PhysicalEvaluationsModule,
+    TechnicalEvaluationsModule,
   ],
   controllers: [],
   providers: [],
