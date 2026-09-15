@@ -19,7 +19,6 @@ export class ResponseCompetencyDto {
     nullable: true,
   })
   finish_date?: Date
-  @ApiProperty({ example: 2026 }) current_year: number
   @ApiPropertyOptional({ example: 1, nullable: true }) id_season?: number | null
   @ApiProperty({
     type: String,

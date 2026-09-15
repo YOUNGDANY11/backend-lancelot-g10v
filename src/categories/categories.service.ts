@@ -22,14 +22,7 @@ export class CategoriesService {
   }
 
   async findAll(filters: FilterCategory) {
-    const {
-      page = 1,
-      limit = 10,
-      name,
-      current_year,
-      min_age,
-      max_age,
-    } = filters
+    const { page = 1, limit = 10, name, min_age, max_age } = filters
 
     const skip = (page - 1) * limit
 
@@ -38,7 +31,6 @@ export class CategoriesService {
       .addSelect([
         'category.id_category',
         'category.name',
-        'category.current_year',
         'category.min_age',
         'category.max_age',
       ])
@@ -48,10 +40,6 @@ export class CategoriesService {
 
     if (name) {
       query.andWhere('category.name ILIKE :name', { name: `%${name}%` })
-    }
-
-    if (current_year) {
-      query.andWhere('category.current_year = :current_year', { current_year })
     }
 
     if (min_age) {

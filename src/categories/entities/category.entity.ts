@@ -26,9 +26,6 @@ export class Category {
   @Column({ nullable: false })
   max_age: number
 
-  @Column({ nullable: false })
-  current_year: number
-
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date
 

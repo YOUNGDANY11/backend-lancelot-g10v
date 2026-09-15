@@ -34,9 +34,6 @@ export class Competency {
   @Column({ nullable: true })
   finish_date: Date
 
-  @Column({ nullable: false })
-  current_year: number
-
   @Column({ nullable: true })
   id_season?: number | null
 

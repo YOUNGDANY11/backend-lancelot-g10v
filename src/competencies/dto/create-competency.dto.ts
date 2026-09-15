@@ -50,11 +50,6 @@ export class CreateCompetencyDto {
   })
   finish?: Date
 
-  @IsNotEmpty()
-  @Type(() => Number)
-  @ApiProperty({ description: 'Año de vigencia.', example: 2026 })
-  current_year: number
-
   @IsOptional()
   @Type(() => Number)
   @ApiPropertyOptional({

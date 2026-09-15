@@ -19,10 +19,4 @@ export class CreateCategoryDto {
   @IsInt()
   @ApiProperty({ description: 'Edad máxima permitida.', example: 15 })
   max_age: number
-
-  @IsNotEmpty()
-  @Type(() => Number)
-  @IsInt()
-  @ApiProperty({ description: 'Año de vigencia.', example: 2026 })
-  current_year: number
 }

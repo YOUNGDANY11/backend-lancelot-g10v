@@ -25,7 +25,6 @@ export class CompetenciesService {
       page = 1,
       limit = 10,
       name,
-      current_year,
       id_season,
       start_date,
       finish_date,
@@ -38,7 +37,6 @@ export class CompetenciesService {
       .addSelect([
         'competency.id_competency',
         'competency.name',
-        'competency.current_year',
         'competency.id_season',
         'competency.start_date',
         'competency.finish_date',
@@ -49,12 +47,6 @@ export class CompetenciesService {
 
     if (name) {
       query.andWhere('competency.name ILIKE :name', { name: `%${name}%` })
-    }
-
-    if (current_year) {
-      query.andWhere('competency.current_year = :current_year', {
-        current_year,
-      })
     }
 
     if (id_season) {

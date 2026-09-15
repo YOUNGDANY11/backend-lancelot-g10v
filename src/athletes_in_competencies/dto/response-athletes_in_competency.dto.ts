@@ -30,9 +30,9 @@ export class ResponseAthInComp {
   name_competency: string
 
   @Expose()
-  @Transform(({ obj }) => obj.competency?.current_year)
-  @ApiProperty({ example: 2026 })
-  current_year_competency: number
+  @Transform(({ obj }) => obj.competency?.id_season)
+  @ApiProperty({ example: 1, nullable: true })
+  id_season_competency: number | null
 
   @Expose()
   @ApiProperty({ type: String, format: 'date-time' })

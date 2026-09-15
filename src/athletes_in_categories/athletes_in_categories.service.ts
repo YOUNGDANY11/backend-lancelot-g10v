@@ -13,6 +13,7 @@ import { plainToInstance } from 'class-transformer'
 import { ResponseAthInCat } from './dto/response-ath_cat.dto'
 import { UsersService } from 'src/users/users.service'
 import { RolesService } from 'src/roles/roles.service'
+import { SeasonsService } from 'src/seasons/seasons.service'
 
 @Injectable()
 export class AthletesInCategoriesService {
@@ -21,6 +22,7 @@ export class AthletesInCategoriesService {
     private athInCatRepository: Repository<AthletesInCategory>,
     private readonly usersService: UsersService,
     private readonly rolesService: RolesService,
+    private readonly seasonsService: SeasonsService,
   ) {}
 
   async findOneById(id_ath_cat: number) {
@@ -171,10 +173,30 @@ export class AthletesInCategoriesService {
     }
   }
 
+  private async assertNoDuplicateAssignment(
+    id_user: number,
+    id_category: number,
+    id_season: number | null | undefined,
+    excludeIdAthCat?: number,
+  ) {
+    const duplicateWhere = id_season
+      ? { id_user, id_season }
+      : { id_user, id_category }
+    const existAthInCat = await this.athInCatRepository.findOne({
+      where: duplicateWhere,
+    })
+    if (existAthInCat && existAthInCat.id_ath_cat !== excludeIdAthCat)
+      throw new BadRequestException({
+        status: 'Error',
+        mensaje: id_season
+          ? 'Este deportista ya esta asignado a una categoria en esta temporada'
+          : 'Este deportista ya esta en esta categoria',
+      })
+  }
+
   async create(createAthletesInCategoryDto: CreateAthletesInCategoryDto) {
-    const existUser = await this.usersService.findOneById(
-      createAthletesInCategoryDto.id_user,
-    )
+    const { id_user, id_category, id_season } = createAthletesInCategoryDto
+    const existUser = await this.usersService.findOneById(id_user)
     if (!existUser)
       throw new BadRequestException({
         status: 'Error',
@@ -185,17 +207,15 @@ export class AthletesInCategoriesService {
         status: 'Error',
         mensaje: 'Este usuario no es un deportista',
       })
-    const existAthInCat = await this.athInCatRepository.findOne({
-      where: {
-        id_user: createAthletesInCategoryDto.id_user,
-        id_category: createAthletesInCategoryDto.id_category,
-      },
-    })
-    if (existAthInCat)
-      throw new BadRequestException({
-        status: 'Error',
-        mensaje: 'Este deportista ya esta en esta categoria',
-      })
+    if (id_season) {
+      const existSeason = await this.seasonsService.findOneById(id_season)
+      if (!existSeason)
+        throw new BadRequestException({
+          status: 'Error',
+          mensaje: 'No existe esta temporada',
+        })
+    }
+    await this.assertNoDuplicateAssignment(id_user, id_category, id_season)
     const athInCat = await this.athInCatRepository.save(
       createAthletesInCategoryDto,
     )
@@ -218,17 +238,27 @@ export class AthletesInCategoriesService {
         status: 'Error',
         mensaje: 'No existe este deportista en categoria',
       })
-    const existAthInCat = await this.athInCatRepository.findOne({
-      where: {
-        id_user: updateAthletesInCategoryDto.id_user,
-        id_category: updateAthletesInCategoryDto.id_category,
-      },
-    })
-    if (existAthInCat)
-      throw new BadRequestException({
-        status: 'Error',
-        mensaje: 'Este deportista ya esta en esta categoria',
-      })
+    const id_user = updateAthletesInCategoryDto.id_user ?? existsAthInCat.id_user
+    const id_category =
+      updateAthletesInCategoryDto.id_category ?? existsAthInCat.id_category
+    const id_season =
+      updateAthletesInCategoryDto.id_season ?? existsAthInCat.id_season
+    if (updateAthletesInCategoryDto.id_season) {
+      const existSeason = await this.seasonsService.findOneById(
+        updateAthletesInCategoryDto.id_season,
+      )
+      if (!existSeason)
+        throw new BadRequestException({
+          status: 'Error',
+          mensaje: 'No existe esta temporada',
+        })
+    }
+    await this.assertNoDuplicateAssignment(
+      id_user,
+      id_category,
+      id_season,
+      id_ath_cat,
+    )
     const athInCat = await this.athInCatRepository.merge(
       existsAthInCat,
       updateAthletesInCategoryDto,

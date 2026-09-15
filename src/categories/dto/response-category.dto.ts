@@ -5,7 +5,6 @@ export class ResponseCategoryDto {
   @ApiProperty({ example: 'Sub-15' }) name: string
   @ApiProperty({ example: 13 }) min_age: number
   @ApiProperty({ example: 15 }) max_age: number
-  @ApiProperty({ example: 2026 }) current_year: number
   @ApiProperty({
     type: String,
     format: 'date-time',

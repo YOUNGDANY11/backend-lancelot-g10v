@@ -28,12 +28,6 @@ export class FilterCategory {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @ApiPropertyOptional({ example: 2026 })
-  current_year?: number
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
   @ApiPropertyOptional({ example: 13 })
   min_age?: number
 

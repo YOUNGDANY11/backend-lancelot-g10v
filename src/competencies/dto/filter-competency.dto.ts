@@ -28,12 +28,6 @@ export class FilterCompetency {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @ApiPropertyOptional({ example: 2026 })
-  current_year?: number
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
   @ApiPropertyOptional({
     description: 'Filtrar por id de temporada.',
     example: 1,
