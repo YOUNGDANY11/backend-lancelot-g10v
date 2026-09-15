@@ -10,19 +10,30 @@ import {
   InjuryRiskRuleCode,
 } from './entities/injury-risk-assessment.entity'
 
-export const SUSTAINED_ACWR_THRESHOLD = 1.5
-export const SUSTAINED_ACWR_MIN_DAYS = 2
-export const SUSTAINED_ACWR_LOOKBACK_DAYS = 7
+export interface InjuryRiskRuleThresholds {
+  sustained_acwr_threshold: number
+  sustained_acwr_min_days: number
+  sustained_acwr_lookback_days: number
+  sustained_rpe_threshold: number
+  sustained_rpe_min_sessions: number
+  sustained_rpe_lookback_days: number
+}
 
-export const SUSTAINED_RPE_THRESHOLD = 8
-export const SUSTAINED_RPE_MIN_SESSIONS = 3
-export const SUSTAINED_RPE_LOOKBACK_DAYS = 14
+export const DEFAULT_INJURY_RISK_RULE_THRESHOLDS: InjuryRiskRuleThresholds = {
+  sustained_acwr_threshold: 1.5,
+  sustained_acwr_min_days: 2,
+  sustained_acwr_lookback_days: 7,
+  sustained_rpe_threshold: 8,
+  sustained_rpe_min_sessions: 3,
+  sustained_rpe_lookback_days: 14,
+}
 
 export interface InjuryRiskRulesInput {
   records: TrainingLoadRecord[]
   referenceDate: Date
   isRecoveringFromInjury: boolean
   acwrThresholds: AcwrThresholdsInput
+  ruleThresholds: InjuryRiskRuleThresholds
 }
 
 export interface InjuryRiskRulesResult {
@@ -51,6 +62,7 @@ export class InjuryRiskRulesService {
   private checkSustainedAcwr(
     records: TrainingLoadRecord[],
     referenceDate: Date,
+    ruleThresholds: InjuryRiskRuleThresholds,
   ): { triggered: boolean; streakDays: number } {
     const neutralThresholds: AcwrThresholdsInput = {
       low_min: 0,
@@ -58,35 +70,46 @@ export class InjuryRiskRulesService {
       medium_max: 0,
     }
     let streak = 0
-    for (let i = 0; i < SUSTAINED_ACWR_LOOKBACK_DAYS; i++) {
+    for (let i = 0; i < ruleThresholds.sustained_acwr_lookback_days; i++) {
       const day = this.addDays(this.toDateOnlyUTC(referenceDate), -i)
       const { acwr_value } = this.acwrCalculatorService.calculate(
         records,
         day,
         neutralThresholds,
       )
-      if (acwr_value !== null && acwr_value > SUSTAINED_ACWR_THRESHOLD) streak++
+      if (
+        acwr_value !== null &&
+        acwr_value > ruleThresholds.sustained_acwr_threshold
+      )
+        streak++
       else break
     }
-    return { triggered: streak >= SUSTAINED_ACWR_MIN_DAYS, streakDays: streak }
+    return {
+      triggered: streak >= ruleThresholds.sustained_acwr_min_days,
+      streakDays: streak,
+    }
   }
 
   private checkSustainedHighRpe(
     records: TrainingLoadRecord[],
     referenceDate: Date,
+    ruleThresholds: InjuryRiskRuleThresholds,
   ): { triggered: boolean; sessionCount: number } {
     const refDay = this.toDateOnlyUTC(referenceDate)
-    const windowStart = this.addDays(refDay, -(SUSTAINED_RPE_LOOKBACK_DAYS - 1))
+    const windowStart = this.addDays(
+      refDay,
+      -(ruleThresholds.sustained_rpe_lookback_days - 1),
+    )
     const sessionCount = records.filter((record) => {
       const day = this.toDateOnlyUTC(new Date(record.date))
       return (
         day >= windowStart &&
         day <= refDay &&
-        record.rpe >= SUSTAINED_RPE_THRESHOLD
+        record.rpe >= ruleThresholds.sustained_rpe_threshold
       )
     }).length
     return {
-      triggered: sessionCount >= SUSTAINED_RPE_MIN_SESSIONS,
+      triggered: sessionCount >= ruleThresholds.sustained_rpe_min_sessions,
       sessionCount,
     }
   }
@@ -99,11 +122,24 @@ export class InjuryRiskRulesService {
   }
 
   evaluate(input: InjuryRiskRulesInput): InjuryRiskRulesResult {
-    const { records, referenceDate, isRecoveringFromInjury, acwrThresholds } =
-      input
+    const {
+      records,
+      referenceDate,
+      isRecoveringFromInjury,
+      acwrThresholds,
+      ruleThresholds,
+    } = input
 
-    const acwrCheck = this.checkSustainedAcwr(records, referenceDate)
-    const rpeCheck = this.checkSustainedHighRpe(records, referenceDate)
+    const acwrCheck = this.checkSustainedAcwr(
+      records,
+      referenceDate,
+      ruleThresholds,
+    )
+    const rpeCheck = this.checkSustainedHighRpe(
+      records,
+      referenceDate,
+      ruleThresholds,
+    )
     const today = this.acwrCalculatorService.calculate(
       records,
       referenceDate,
@@ -120,13 +156,13 @@ export class InjuryRiskRulesService {
     if (acwrCheck.triggered) {
       triggeredRules.push(InjuryRiskRuleCode.SUSTAINED_ACWR)
       details.push(
-        `ACWR > ${SUSTAINED_ACWR_THRESHOLD} durante ${acwrCheck.streakDays} días consecutivos`,
+        `ACWR > ${ruleThresholds.sustained_acwr_threshold} durante ${acwrCheck.streakDays} días consecutivos`,
       )
     }
     if (rpeCheck.triggered) {
       triggeredRules.push(InjuryRiskRuleCode.SUSTAINED_HIGH_RPE)
       details.push(
-        `${rpeCheck.sessionCount} sesiones con RPE >= ${SUSTAINED_RPE_THRESHOLD} en los últimos ${SUSTAINED_RPE_LOOKBACK_DAYS} días`,
+        `${rpeCheck.sessionCount} sesiones con RPE >= ${ruleThresholds.sustained_rpe_threshold} en los últimos ${ruleThresholds.sustained_rpe_lookback_days} días`,
       )
     }
     if (relapseTriggered) {

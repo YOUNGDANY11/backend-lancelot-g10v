@@ -27,6 +27,7 @@ import { PositionWeightProfilesModule } from './position_weight_profiles/positio
 import { WeightedProgressIndexModule } from './weighted_progress_index/weighted-progress-index.module'
 import { TalentFlagsModule } from './talent_flags/talent-flags.module'
 import { ReportsModule } from './reports/reports.module'
+import { InjuryRiskRuleConfigModule } from './injury_risk_rule_config/injury-risk-rule-config.module'
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { ReportsModule } from './reports/reports.module'
     WeightedProgressIndexModule,
     TalentFlagsModule,
     ReportsModule,
+    InjuryRiskRuleConfigModule,
   ],
   controllers: [],
   providers: [],

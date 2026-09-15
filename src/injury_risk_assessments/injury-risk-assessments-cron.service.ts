@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { AcwrConfigService } from 'src/acwr_config/acwr-config.service'
 import { CHRONIC_WINDOW_DAYS } from 'src/fatigue_alerts/acwr-calculator.service'
+import { InjuryRiskRuleConfig } from 'src/injury_risk_rule_config/entities/injury-risk-rule-config.entity'
+import { InjuryRiskRuleConfigService } from 'src/injury_risk_rule_config/injury-risk-rule-config.service'
 import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
 import { Injury, InjuryStatus } from 'src/injuries/entities/injury.entity'
 import { UsersService } from 'src/users/users.service'
@@ -11,16 +13,7 @@ import {
   InjuryRiskAssessment,
   InjuryRiskAssessmentMethod,
 } from './entities/injury-risk-assessment.entity'
-import {
-  InjuryRiskRulesService,
-  SUSTAINED_ACWR_LOOKBACK_DAYS,
-  SUSTAINED_RPE_LOOKBACK_DAYS,
-} from './injury-risk-rules.service'
-
-const LOOKBACK_DAYS =
-  CHRONIC_WINDOW_DAYS +
-  Math.max(SUSTAINED_ACWR_LOOKBACK_DAYS, SUSTAINED_RPE_LOOKBACK_DAYS) -
-  1
+import { InjuryRiskRulesService } from './injury-risk-rules.service'
 
 @Injectable()
 export class InjuryRiskAssessmentsCronService {
@@ -35,6 +28,7 @@ export class InjuryRiskAssessmentsCronService {
     private readonly injuryRiskAssessmentsRepository: Repository<InjuryRiskAssessment>,
     private readonly usersService: UsersService,
     private readonly acwrConfigService: AcwrConfigService,
+    private readonly injuryRiskRuleConfigService: InjuryRiskRuleConfigService,
     private readonly injuryRiskRulesService: InjuryRiskRulesService,
   ) {}
 
@@ -42,10 +36,16 @@ export class InjuryRiskAssessmentsCronService {
   async recalculateInjuryRiskAssessments() {
     const referenceDate = new Date()
     const athleteIds = await this.usersService.findAllAthleteIds()
-    const thresholds = await this.acwrConfigService.getActive()
+    const acwrThresholds = await this.acwrConfigService.getActive()
+    const ruleThresholds = await this.injuryRiskRuleConfigService.getActive()
 
     for (const id_user of athleteIds) {
-      await this.processAthlete(id_user, referenceDate, thresholds)
+      await this.processAthlete(
+        id_user,
+        referenceDate,
+        acwrThresholds,
+        ruleThresholds,
+      )
     }
 
     this.logger.log(
@@ -56,10 +56,19 @@ export class InjuryRiskAssessmentsCronService {
   private async processAthlete(
     id_user: number,
     referenceDate: Date,
-    thresholds: { low_min: number; low_max: number; medium_max: number },
+    acwrThresholds: { low_min: number; low_max: number; medium_max: number },
+    ruleThresholds: InjuryRiskRuleConfig,
   ) {
+    const lookbackDays =
+      CHRONIC_WINDOW_DAYS +
+      Math.max(
+        Number(ruleThresholds.sustained_acwr_lookback_days),
+        Number(ruleThresholds.sustained_rpe_lookback_days),
+      ) -
+      1
+
     const windowStart = new Date(referenceDate)
-    windowStart.setUTCDate(windowStart.getUTCDate() - (LOOKBACK_DAYS - 1))
+    windowStart.setUTCDate(windowStart.getUTCDate() - (lookbackDays - 1))
 
     const loads = await this.trainingLoadsRepository
       .createQueryBuilder('load')
@@ -89,9 +98,23 @@ export class InjuryRiskAssessmentsCronService {
       referenceDate,
       isRecoveringFromInjury,
       acwrThresholds: {
-        low_min: Number(thresholds.low_min),
-        low_max: Number(thresholds.low_max),
-        medium_max: Number(thresholds.medium_max),
+        low_min: Number(acwrThresholds.low_min),
+        low_max: Number(acwrThresholds.low_max),
+        medium_max: Number(acwrThresholds.medium_max),
+      },
+      ruleThresholds: {
+        sustained_acwr_threshold: Number(ruleThresholds.sustained_acwr_threshold),
+        sustained_acwr_min_days: Number(ruleThresholds.sustained_acwr_min_days),
+        sustained_acwr_lookback_days: Number(
+          ruleThresholds.sustained_acwr_lookback_days,
+        ),
+        sustained_rpe_threshold: Number(ruleThresholds.sustained_rpe_threshold),
+        sustained_rpe_min_sessions: Number(
+          ruleThresholds.sustained_rpe_min_sessions,
+        ),
+        sustained_rpe_lookback_days: Number(
+          ruleThresholds.sustained_rpe_lookback_days,
+        ),
       },
     })
 
