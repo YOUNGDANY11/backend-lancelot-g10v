@@ -1,0 +1,51 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { Type } from 'class-transformer'
+import { IsInt, IsOptional, Min } from 'class-validator'
+
+export class CreateMatchStatisticDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @ApiProperty({ example: 1 })
+  id_match: number
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @ApiProperty({ example: 7 })
+  id_user: number
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @ApiProperty({ example: 90 })
+  minutes_played: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @ApiPropertyOptional({ example: 1, default: 0 })
+  goals?: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @ApiPropertyOptional({ example: 0, default: 0 })
+  assists?: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @ApiPropertyOptional({ example: 0, default: 0 })
+  yellow_cards?: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @ApiPropertyOptional({ example: 0, default: 0 })
+  red_cards?: number
+}

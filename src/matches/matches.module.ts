@@ -14,5 +14,6 @@ import { CompetenciesModule } from 'src/competencies/competencies.module'
   ],
   controllers: [MatchesController],
   providers: [MatchesService],
+  exports: [MatchesService],
 })
 export class MatchesModule {}

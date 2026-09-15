@@ -18,6 +18,7 @@ import { HealthRecordsModule } from './health_records/health-records.module'
 import { DevelopmentObjectivesModule } from './development_objectives/development-objectives.module'
 import { TrainingSessionsModule } from './training_sessions/training-sessions.module'
 import { TrainingLoadsModule } from './training_loads/training-loads.module'
+import { MatchStatisticsModule } from './match_statistics/match-statistics.module'
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { TrainingLoadsModule } from './training_loads/training-loads.module'
     DevelopmentObjectivesModule,
     TrainingSessionsModule,
     TrainingLoadsModule,
+    MatchStatisticsModule,
   ],
   controllers: [],
   providers: [],
