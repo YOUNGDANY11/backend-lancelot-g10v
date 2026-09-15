@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException, OnApplicationBootstrap,} from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  OnApplicationBootstrap,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateRoleDto } from './dto/create-role.dto'
@@ -49,7 +54,10 @@ export class RolesService implements OnApplicationBootstrap {
   async findOne(id_role: number) {
     const role = await this.rolesRepository.findOne({ where: { id_role } })
     if (!role)
-      throw new NotFoundException({ status: 'Error', mensaje: 'No existe este rol' })
+      throw new NotFoundException({
+        status: 'Error',
+        mensaje: 'No existe este rol',
+      })
     return role
   }
 
@@ -70,7 +78,9 @@ export class RolesService implements OnApplicationBootstrap {
           mensaje: 'Ya existe un rol con ese nombre o código',
         })
     }
-    return this.rolesRepository.save(this.rolesRepository.merge(role, updateRoleDto))
+    return this.rolesRepository.save(
+      this.rolesRepository.merge(role, updateRoleDto),
+    )
   }
 
   async remove(id_role: number) {

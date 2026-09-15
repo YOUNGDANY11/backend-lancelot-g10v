@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { plainToInstance } from 'class-transformer'
 import { Repository } from 'typeorm'
@@ -19,7 +23,8 @@ export class SeasonsService {
     if (end_date && end_date < start_date) {
       throw new BadRequestException({
         status: 'Error',
-        mensaje: 'La fecha de finalización no puede ser anterior a la fecha de inicio',
+        mensaje:
+          'La fecha de finalización no puede ser anterior a la fecha de inicio',
       })
     }
   }

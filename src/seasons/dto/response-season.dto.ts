@@ -16,7 +16,11 @@ export class ResponseSeasonDto {
   start_date: string
 
   @Expose()
-  @ApiPropertyOptional({ example: '2026-06-30', format: 'date', nullable: true })
+  @ApiPropertyOptional({
+    example: '2026-06-30',
+    format: 'date',
+    nullable: true,
+  })
   end_date?: string | null
 
   @Expose()
