@@ -37,4 +37,13 @@ export class FilterAthInCat {
   @IsString()
   @ApiPropertyOptional({ example: 'Sub-15' })
   category_name?: string
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @ApiPropertyOptional({
+    description: 'Filtrar por id de temporada.',
+    example: 1,
+  })
+  id_season?: number
 }

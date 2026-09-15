@@ -1,4 +1,5 @@
 import { Category } from 'src/categories/entities/category.entity'
+import { Season } from 'src/seasons/entities/season.entity'
 import { User } from 'src/users/entities/user.entity'
 import {
   Column,
@@ -21,6 +22,12 @@ export class AthletesInCategory {
   @Column({ nullable: false })
   id_category: number
 
+  @Column({ nullable: true })
+  id_season?: number | null
+
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  position?: string | null
+
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date
 
@@ -34,4 +41,8 @@ export class AthletesInCategory {
   @ManyToOne(() => Category, (category) => category.athletesInCategory)
   @JoinColumn({ name: 'id_category' })
   category: Category
+
+  @ManyToOne(() => Season, { nullable: true })
+  @JoinColumn({ name: 'id_season' })
+  season?: Season | null
 }

@@ -47,6 +47,7 @@ export class AthletesInCategoriesService {
       lastname,
       id_category,
       category_name,
+      id_season,
     } = filters
 
     const skip = (page - 1) * limit
@@ -80,6 +81,12 @@ export class AthletesInCategoriesService {
     if (category_name) {
       query.andWhere('category.name ILIKE :category_name', {
         category_name: `%${category_name}%`,
+      })
+    }
+
+    if (id_season) {
+      query.andWhere('athlete_in_category.id_season = :id_season', {
+        id_season,
       })
     }
 

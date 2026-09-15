@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer'
-import { IsInt, IsNotEmpty } from 'class-validator'
-import { ApiProperty } from '@nestjs/swagger'
+import { IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 export class CreateAthletesInCategoryDto {
   @IsNotEmpty()
@@ -22,4 +22,22 @@ export class CreateAthletesInCategoryDto {
     minimum: 1,
   })
   id_category: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @ApiPropertyOptional({
+    description: 'Identificador de la temporada.',
+    example: 1,
+  })
+  id_season?: number
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  @ApiPropertyOptional({
+    description: 'Posición del deportista en esta asignación.',
+    example: 'Delantero',
+  })
+  position?: string
 }

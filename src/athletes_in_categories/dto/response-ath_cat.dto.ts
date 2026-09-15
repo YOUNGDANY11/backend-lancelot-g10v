@@ -31,6 +31,14 @@ export class ResponseAthInCat {
   lastname: string
 
   @Expose()
+  @ApiProperty({ example: 1, nullable: true })
+  id_season?: number | null
+
+  @Expose()
+  @ApiProperty({ example: 'Delantero', nullable: true })
+  position?: string | null
+
+  @Expose()
   @ApiProperty({ type: String, format: 'date-time' })
   created_at: Date
 
