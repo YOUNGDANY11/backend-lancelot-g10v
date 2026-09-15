@@ -35,7 +35,7 @@ import { SeasonsService } from './seasons.service'
 export class SeasonsController {
   constructor(private readonly seasonsService: SeasonsService) {}
 
-  @Roles('ADMIN', 'DIRECTOR_TECNICO')
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'ENCARGADO_SALUD', 'DEPORTISTA')
   @Get()
   @ApiOperation({ summary: 'Listar temporadas' })
   @ApiQuery({ type: FilterSeasonDto })
@@ -43,7 +43,7 @@ export class SeasonsController {
     return this.seasonsService.findAll(filters)
   }
 
-  @Roles('ADMIN', 'DIRECTOR_TECNICO')
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'ENCARGADO_SALUD', 'DEPORTISTA')
   @Get('id/:id')
   @ApiOperation({ summary: 'Consultar una temporada por ID' })
   @ApiParam({ name: 'id', type: Number })
