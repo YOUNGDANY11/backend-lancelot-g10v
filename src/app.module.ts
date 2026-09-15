@@ -22,6 +22,7 @@ import { MatchStatisticsModule } from './match_statistics/match-statistics.modul
 import { InjuriesModule } from './injuries/injuries.module'
 import { AcwrConfigModule } from './acwr_config/acwr-config.module'
 import { FatigueAlertsModule } from './fatigue_alerts/fatigue-alerts.module'
+import { InjuryRiskAssessmentsModule } from './injury_risk_assessments/injury-risk-assessments.module'
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { FatigueAlertsModule } from './fatigue_alerts/fatigue-alerts.module'
     InjuriesModule,
     AcwrConfigModule,
     FatigueAlertsModule,
+    InjuryRiskAssessmentsModule,
   ],
   controllers: [],
   providers: [],
