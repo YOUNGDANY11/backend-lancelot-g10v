@@ -72,7 +72,7 @@ export class UsersController {
     return this.usersService.getById(id_user)
   }
 
-  @Roles('ADMIN', 'ENTRENADOR')
+  @Roles('ADMIN', 'ENTRENADOR','DIRECTOR_TECNICO','DEPORTISTA','ENCARGADO_SALUD')
   @Get('me')
   @ApiOperation({
     summary: 'Consultar mi perfil',
