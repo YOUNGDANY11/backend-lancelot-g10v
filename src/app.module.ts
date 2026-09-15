@@ -23,6 +23,8 @@ import { InjuriesModule } from './injuries/injuries.module'
 import { AcwrConfigModule } from './acwr_config/acwr-config.module'
 import { FatigueAlertsModule } from './fatigue_alerts/fatigue-alerts.module'
 import { InjuryRiskAssessmentsModule } from './injury_risk_assessments/injury-risk-assessments.module'
+import { PositionWeightProfilesModule } from './position_weight_profiles/position-weight-profiles.module'
+import { WeightedProgressIndexModule } from './weighted_progress_index/weighted-progress-index.module'
 
 @Module({
   imports: [
@@ -60,6 +62,8 @@ import { InjuryRiskAssessmentsModule } from './injury_risk_assessments/injury-ri
     AcwrConfigModule,
     FatigueAlertsModule,
     InjuryRiskAssessmentsModule,
+    PositionWeightProfilesModule,
+    WeightedProgressIndexModule,
   ],
   controllers: [],
   providers: [],
