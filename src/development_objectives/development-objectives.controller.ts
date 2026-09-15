@@ -19,9 +19,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { GetUser } from 'src/auth/decorators/get-user.decorator'
 import { Roles } from 'src/auth/decorators/roles.decorator'
 import { JwtAuthGuard } from 'src/auth/guard/jwt-guard'
 import { RolesGuard } from 'src/auth/guard/roles.guard'
+import { assertOwnRecordOrStaff, isDeportista } from 'src/common/utils/ownership.util'
+import { User } from 'src/users/entities/user.entity'
 import { CreateDevelopmentObjectiveDto } from './dto/create-development-objective.dto'
 import { FilterDevelopmentObjectiveDto } from './dto/filter-development-objective.dto'
 import { ResponseDevelopmentObjectiveDto } from './dto/response-development-objective.dto'
@@ -37,21 +40,30 @@ export class DevelopmentObjectivesController {
     private readonly developmentObjectivesService: DevelopmentObjectivesService,
   ) {}
 
-  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR')
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'DEPORTISTA')
   @Get()
   @ApiOperation({ summary: 'Listar objetivos de desarrollo' })
   @ApiQuery({ type: FilterDevelopmentObjectiveDto })
-  findAll(@Query() filters: FilterDevelopmentObjectiveDto) {
+  findAll(
+    @Query() filters: FilterDevelopmentObjectiveDto,
+    @GetUser() user: User,
+  ) {
+    if (isDeportista(user)) filters.id_user = user.id_user
     return this.developmentObjectivesService.findAll(filters)
   }
 
-  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR')
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'DEPORTISTA')
   @Get('id/:id')
   @ApiOperation({ summary: 'Consultar un objetivo de desarrollo por ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ type: ResponseDevelopmentObjectiveDto })
-  getById(@Param('id', ParseIntPipe) id_objective: number) {
-    return this.developmentObjectivesService.getById(id_objective)
+  async getById(
+    @Param('id', ParseIntPipe) id_objective: number,
+    @GetUser() user: User,
+  ) {
+    const result = await this.developmentObjectivesService.getById(id_objective)
+    assertOwnRecordOrStaff(user, result.objective.id_user)
+    return result
   }
 
   @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR')

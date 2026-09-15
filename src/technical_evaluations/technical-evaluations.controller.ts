@@ -19,9 +19,12 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger'
+import { GetUser } from 'src/auth/decorators/get-user.decorator'
 import { Roles } from 'src/auth/decorators/roles.decorator'
 import { JwtAuthGuard } from 'src/auth/guard/jwt-guard'
 import { RolesGuard } from 'src/auth/guard/roles.guard'
+import { assertOwnRecordOrStaff, isDeportista } from 'src/common/utils/ownership.util'
+import { User } from 'src/users/entities/user.entity'
 import { CreateTechnicalEvaluationDto } from './dto/create-technical-evaluation.dto'
 import { FilterTechnicalEvaluationDto } from './dto/filter-technical-evaluation.dto'
 import { ResponseTechnicalEvaluationDto } from './dto/response-technical-evaluation.dto'
@@ -37,30 +40,43 @@ export class TechnicalEvaluationsController {
     private readonly technicalEvaluationsService: TechnicalEvaluationsService,
   ) {}
 
-  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR')
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'DEPORTISTA')
   @Get()
   @ApiOperation({ summary: 'Listar evaluaciones técnicas' })
   @ApiQuery({ type: FilterTechnicalEvaluationDto })
-  findAll(@Query() filters: FilterTechnicalEvaluationDto) {
+  findAll(
+    @Query() filters: FilterTechnicalEvaluationDto,
+    @GetUser() user: User,
+  ) {
+    if (isDeportista(user)) filters.id_user = user.id_user
     return this.technicalEvaluationsService.findAll(filters)
   }
 
-  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR')
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'DEPORTISTA')
   @Get(':id_user/timeline')
   @ApiOperation({ summary: 'Consultar el historial técnico de un deportista' })
   @ApiParam({ name: 'id_user', type: Number })
   @ApiOkResponse({ type: ResponseTechnicalEvaluationDto, isArray: true })
-  timeline(@Param('id_user', ParseIntPipe) id_user: number) {
+  timeline(
+    @Param('id_user', ParseIntPipe) id_user: number,
+    @GetUser() user: User,
+  ) {
+    assertOwnRecordOrStaff(user, id_user)
     return this.technicalEvaluationsService.getTimeline(id_user)
   }
 
-  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR')
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'DEPORTISTA')
   @Get('id/:id')
   @ApiOperation({ summary: 'Consultar una evaluación técnica por ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiOkResponse({ type: ResponseTechnicalEvaluationDto })
-  getById(@Param('id', ParseIntPipe) id_eval_tech: number) {
-    return this.technicalEvaluationsService.getById(id_eval_tech)
+  async getById(
+    @Param('id', ParseIntPipe) id_eval_tech: number,
+    @GetUser() user: User,
+  ) {
+    const result = await this.technicalEvaluationsService.getById(id_eval_tech)
+    assertOwnRecordOrStaff(user, result.evaluation.id_user)
+    return result
   }
 
   @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR')
