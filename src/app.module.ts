@@ -11,6 +11,7 @@ import { AthletesInCompetenciesModule } from './athletes_in_competencies/athlete
 import { CompetenciesModule } from './competencies/competencies.module'
 import { MatchesModule } from './matches/matches.module'
 import { SeasonsModule } from './seasons/seasons.module'
+import { PhysicalEvaluationsModule } from './physical_evaluations/physical-evaluations.module'
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SeasonsModule } from './seasons/seasons.module'
     CompetenciesModule,
     MatchesModule,
     SeasonsModule,
+    PhysicalEvaluationsModule,
   ],
   controllers: [],
   providers: [],
