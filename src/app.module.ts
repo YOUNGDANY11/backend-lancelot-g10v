@@ -40,8 +40,9 @@ import { InjuryRiskRuleConfigModule } from './injury_risk_rule_config/injury-ris
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get<string>('URL_DB'),
-        synchronize: true,
+        synchronize: false,
         autoLoadEntities: true,
+        migrations: [__dirname + '/migrations/*{.ts,.js}'],
       }),
     }),
     UsersModule,
