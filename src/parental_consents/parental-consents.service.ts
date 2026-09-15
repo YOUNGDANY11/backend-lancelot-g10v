@@ -11,7 +11,10 @@ import { CreateParentalConsentDto } from './dto/create-parental-consent.dto'
 import { FilterParentalConsentDto } from './dto/filter-parental-consent.dto'
 import { ResponseParentalConsentDto } from './dto/response-parental-consent.dto'
 import { UpdateParentalConsentDto } from './dto/update-parental-consent.dto'
-import { ParentalConsent } from './entities/parental-consent.entity'
+import {
+  ParentalConsent,
+  ParentalConsentStatus,
+} from './entities/parental-consent.entity'
 
 @Injectable()
 export class ParentalConsentsService {
@@ -28,6 +31,19 @@ export class ParentalConsentsService {
     const day = date.getUTCDate()
     if (month < birthMonth || (month === birthMonth && day < birthDay)) age -= 1
     return age < 18
+  }
+
+  async isAthleteMinor(id_user: number, atDate: Date = new Date()) {
+    const athlete = await this.usersService.findOneById(id_user)
+    if (!athlete || !athlete.birth_date) return false
+    return this.isMinorOn(athlete.birth_date, atDate)
+  }
+
+  async hasGrantedConsent(id_user: number) {
+    const consent = await this.parentalConsentsRepository.findOne({
+      where: { id_user, status: ParentalConsentStatus.GRANTED },
+    })
+    return !!consent
   }
 
   private async validateMinor(id_user: number, signed_at: string | Date) {

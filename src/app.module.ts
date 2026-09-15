@@ -14,6 +14,7 @@ import { SeasonsModule } from './seasons/seasons.module'
 import { PhysicalEvaluationsModule } from './physical_evaluations/physical-evaluations.module'
 import { TechnicalEvaluationsModule } from './technical_evaluations/technical-evaluations.module'
 import { ParentalConsentsModule } from './parental_consents/parental-consents.module'
+import { HealthRecordsModule } from './health_records/health-records.module'
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ParentalConsentsModule } from './parental_consents/parental-consents.mo
     PhysicalEvaluationsModule,
     TechnicalEvaluationsModule,
     ParentalConsentsModule,
+    HealthRecordsModule,
   ],
   controllers: [],
   providers: [],
