@@ -26,6 +26,7 @@ export class CompetenciesService {
       limit = 10,
       name,
       current_year,
+      id_season,
       start_date,
       finish_date,
     } = filters
@@ -38,6 +39,7 @@ export class CompetenciesService {
         'competency.id_competency',
         'competency.name',
         'competency.current_year',
+        'competency.id_season',
         'competency.start_date',
         'competency.finish_date',
       ])
@@ -53,6 +55,10 @@ export class CompetenciesService {
       query.andWhere('competency.current_year = :current_year', {
         current_year,
       })
+    }
+
+    if (id_season) {
+      query.andWhere('competency.id_season = :id_season', { id_season })
     }
 
     if (start_date) {

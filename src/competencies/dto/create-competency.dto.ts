@@ -54,4 +54,12 @@ export class CreateCompetencyDto {
   @Type(() => Number)
   @ApiProperty({ description: 'Año de vigencia.', example: 2026 })
   current_year: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @ApiPropertyOptional({
+    description: 'Id de la temporada a la que pertenece la competencia.',
+    example: 1,
+  })
+  id_season?: number
 }

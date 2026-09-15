@@ -1,11 +1,13 @@
 import { AthletesInCompetency } from 'src/athletes_in_competencies/entities/athletes_in_competency.entity'
 import { Category } from 'src/categories/entities/category.entity'
 import { Match } from 'src/matches/entities/match.entity'
+import { Season } from 'src/seasons/entities/season.entity'
 import {
   Column,
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -35,6 +37,9 @@ export class Competency {
   @Column({ nullable: false })
   current_year: number
 
+  @Column({ nullable: true })
+  id_season?: number | null
+
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date
 
@@ -54,4 +59,8 @@ export class Competency {
   @OneToOne(() => Category, (category) => category.competency)
   @JoinColumn({ name: 'id_category' })
   category: Category
+
+  @ManyToOne(() => Season, { nullable: true })
+  @JoinColumn({ name: 'id_season' })
+  season?: Season | null
 }
