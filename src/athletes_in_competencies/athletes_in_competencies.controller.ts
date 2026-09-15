@@ -16,6 +16,7 @@ import { CreateAthletesInCompetencyDto } from './dto/create-athletes_in_competen
 import { UpdateAthletesInCompetencyDto } from './dto/update-athletes_in_competency.dto'
 import { FilterAthInComp } from './dto/filter-athletes_in_competencies.dto'
 import { GetUser } from 'src/auth/decorators/get-user.decorator'
+import { Roles } from 'src/auth/decorators/roles.decorator'
 import { JwtAuthGuard } from 'src/auth/guard/jwt-guard'
 import { RolesGuard } from 'src/auth/guard/roles.guard'
 import {
@@ -73,6 +74,7 @@ export class AthletesInCompetenciesController {
     return this.athletesInCompetenciesService.getById(id_ath_comp)
   }
 
+  @Roles('DEPORTISTA')
   @Get('me')
   @ApiOperation({
     summary: 'Consultar mi competencia',
