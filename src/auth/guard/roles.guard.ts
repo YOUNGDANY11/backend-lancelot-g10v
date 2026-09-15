@@ -25,6 +25,14 @@ export class RolesGuard implements CanActivate {
     if (id_role === 3) {
       return 'DEPORTISTA'
     }
+
+    if(id_role === 4) {
+      return 'DIRECTOR_TECNICO'
+    }
+
+    if(id_role === 5) {
+      return 'ENCARGADO_SALUD'
+    }
   }
 
   canActivate(context: ExecutionContext): boolean {
