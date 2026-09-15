@@ -48,12 +48,12 @@ export class CreateUserDto {
   })
   password: string
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsDateString()
   @ApiPropertyOptional({
     description: 'Fecha de nacimiento del usuario.',
     example: '2012-04-10',
     format: 'date',
   })
-  birth_date?: string
+  birth_date: string
 }

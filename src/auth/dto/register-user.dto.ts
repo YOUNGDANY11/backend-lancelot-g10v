@@ -48,12 +48,12 @@ export class RegisterUserDto {
   })
   password: string
 
-  @IsOptional()
+  @IsString()
   @IsDateString()
   @ApiPropertyOptional({
     description: 'Fecha de nacimiento del deportista.',
     example: '2012-04-10',
     format: 'date',
   })
-  birth_date?: string
+  birth_date: string
 }
