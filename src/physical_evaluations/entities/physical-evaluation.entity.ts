@@ -46,7 +46,7 @@ export class PhysicalEvaluation {
   @Column({ type: 'date' })
   eval_date: string
 
-  @Column({ nullable: true })
+  @Column({ type: 'int', nullable: true })
   evaluator_id?: number | null
 
   @CreateDateColumn({ type: 'timestamptz' })

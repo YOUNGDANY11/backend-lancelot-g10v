@@ -35,7 +35,7 @@ export class ParentalConsent {
   @Column({ type: 'timestamptz' })
   signed_at: Date
 
-  @Column({ length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   document_url?: string | null
 
   @Column({

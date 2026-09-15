@@ -22,7 +22,7 @@ export class HealthRecordAccessLog {
   @PrimaryGeneratedColumn()
   id_log: number
 
-  @Column({ nullable: true })
+  @Column({ type: 'int', nullable: true })
   id_health?: number | null
 
   @Column()

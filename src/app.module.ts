@@ -15,6 +15,7 @@ import { PhysicalEvaluationsModule } from './physical_evaluations/physical-evalu
 import { TechnicalEvaluationsModule } from './technical_evaluations/technical-evaluations.module'
 import { ParentalConsentsModule } from './parental_consents/parental-consents.module'
 import { HealthRecordsModule } from './health_records/health-records.module'
+import { DevelopmentObjectivesModule } from './development_objectives/development-objectives.module'
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { HealthRecordsModule } from './health_records/health-records.module'
     TechnicalEvaluationsModule,
     ParentalConsentsModule,
     HealthRecordsModule,
+    DevelopmentObjectivesModule,
   ],
   controllers: [],
   providers: [],
