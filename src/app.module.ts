@@ -13,6 +13,7 @@ import { MatchesModule } from './matches/matches.module'
 import { SeasonsModule } from './seasons/seasons.module'
 import { PhysicalEvaluationsModule } from './physical_evaluations/physical-evaluations.module'
 import { TechnicalEvaluationsModule } from './technical_evaluations/technical-evaluations.module'
+import { ParentalConsentsModule } from './parental_consents/parental-consents.module'
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TechnicalEvaluationsModule } from './technical_evaluations/technical-ev
     SeasonsModule,
     PhysicalEvaluationsModule,
     TechnicalEvaluationsModule,
+    ParentalConsentsModule,
   ],
   controllers: [],
   providers: [],

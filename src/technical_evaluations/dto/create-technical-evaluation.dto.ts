@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsDateString, IsInt, IsNotEmpty, IsNumber, IsString, Length, Max, Min, } from 'class-validator'
+import {
+  IsDateString,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  Length,
+  Max,
+  Min,
+} from 'class-validator'
 
 export class CreateTechnicalEvaluationDto {
   @Type(() => Number)

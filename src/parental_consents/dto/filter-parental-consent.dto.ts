@@ -1,15 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import {
-  IsDateString,
-  IsInt,
-  IsOptional,
-  IsString,
-  Max,
-  Min,
-} from 'class-validator'
+import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator'
+import { ParentalConsentStatus } from '../entities/parental-consent.entity'
 
-export class FilterTechnicalEvaluationDto {
+export class FilterParentalConsentDto {
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -33,19 +27,7 @@ export class FilterTechnicalEvaluationDto {
   id_user?: number
 
   @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @ApiPropertyOptional({ example: 1 })
-  id_season?: number
-
-  @IsOptional()
-  @IsString()
-  @ApiPropertyOptional({ example: 'pase' })
-  indicator?: string
-
-  @IsOptional()
-  @IsDateString()
-  @ApiPropertyOptional({ example: '2026-01-22', format: 'date' })
-  eval_date?: string
+  @IsEnum(ParentalConsentStatus)
+  @ApiPropertyOptional({ enum: ParentalConsentStatus })
+  status?: ParentalConsentStatus
 }

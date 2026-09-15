@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { plainToInstance } from 'class-transformer'
 import { Repository } from 'typeorm'
@@ -54,8 +58,14 @@ export class TechnicalEvaluationsService {
   }
 
   async findAll(filters: FilterTechnicalEvaluationDto) {
-    const { page = 1, limit = 10, id_user, id_season, indicator, eval_date } =
-      filters
+    const {
+      page = 1,
+      limit = 10,
+      id_user,
+      id_season,
+      indicator,
+      eval_date,
+    } = filters
     const query = this.technicalEvaluationsRepository
       .createQueryBuilder('evaluation')
       .leftJoinAndSelect('evaluation.athlete', 'athlete')
@@ -85,9 +95,13 @@ export class TechnicalEvaluationsService {
     return {
       status: 'Success',
       mensaje: 'Consulta de evaluaciones técnicas exitosa',
-      evaluations: plainToInstance(ResponseTechnicalEvaluationDto, evaluations, {
-        excludeExtraneousValues: true,
-      }),
+      evaluations: plainToInstance(
+        ResponseTechnicalEvaluationDto,
+        evaluations,
+        {
+          excludeExtraneousValues: true,
+        },
+      ),
       pagination: { total, page, limit, totalPages: Math.ceil(total / limit) },
     }
   }
@@ -123,9 +137,13 @@ export class TechnicalEvaluationsService {
     return {
       status: 'Success',
       mensaje: 'Historial de evaluaciones técnicas exitoso',
-      evaluations: plainToInstance(ResponseTechnicalEvaluationDto, evaluations, {
-        excludeExtraneousValues: true,
-      }),
+      evaluations: plainToInstance(
+        ResponseTechnicalEvaluationDto,
+        evaluations,
+        {
+          excludeExtraneousValues: true,
+        },
+      ),
     }
   }
 

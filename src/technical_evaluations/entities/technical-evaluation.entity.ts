@@ -1,6 +1,14 @@
 import { Season } from 'src/seasons/entities/season.entity'
 import { User } from 'src/users/entities/user.entity'
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm'
 
 @Entity('technical_evaluations')
 export class TechnicalEvaluation {
