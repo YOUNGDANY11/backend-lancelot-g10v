@@ -1,16 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
 import { CreateCompetencyDto } from './dto/create-competency.dto'
 import { UpdateCompetencyDto } from './dto/update-competency.dto'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Competency } from './entities/competency.entity'
 import { Repository } from 'typeorm'
 import { FilterCompetency } from './dto/filter-competency.dto'
+import { SeasonsService } from 'src/seasons/seasons.service'
 
 @Injectable()
 export class CompetenciesService {
   constructor(
     @InjectRepository(Competency)
     private competencyRepository: Repository<Competency>,
+    private readonly seasonsService: SeasonsService,
   ) {}
 
   async findOneById(id_competency: number) {
@@ -97,6 +103,14 @@ export class CompetenciesService {
   }
 
   async create(createCompetencyDto: CreateCompetencyDto) {
+    const existsSeason = await this.seasonsService.findOneById(
+      createCompetencyDto.id_season,
+    )
+    if (!existsSeason)
+      throw new BadRequestException({
+        status: 'Error',
+        mensaje: 'No existe esta temporada',
+      })
     const competency = await this.competencyRepository.save(createCompetencyDto)
     return {
       status: 'Success',
@@ -115,6 +129,16 @@ export class CompetenciesService {
         status: 'Error',
         mensaje: 'No existe esta competencia',
       })
+    if (updateCompetencyDto.id_season) {
+      const existsSeason = await this.seasonsService.findOneById(
+        updateCompetencyDto.id_season,
+      )
+      if (!existsSeason)
+        throw new BadRequestException({
+          status: 'Error',
+          mensaje: 'No existe esta temporada',
+        })
+    }
     const competency = await this.competencyRepository.merge(
       existsCompetency,
       updateCompetencyDto,

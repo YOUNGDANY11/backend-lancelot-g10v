@@ -216,15 +216,26 @@ export class AthletesInCategoriesService {
         })
     }
     await this.assertNoDuplicateAssignment(id_user, id_category, id_season)
-    const athInCat = await this.athInCatRepository.save(
-      createAthletesInCategoryDto,
-    )
+    const athInCat = await this.saveAssignment(createAthletesInCategoryDto)
     return {
       status: 'Success',
       mensaje: 'Deportista asignado a la categoria de forma exitosa',
       athInCat: plainToInstance(ResponseAthInCat, athInCat, {
         excludeExtraneousValues: true,
       }),
+    }
+  }
+
+  private async saveAssignment(data: Partial<AthletesInCategory>) {
+    try {
+      return await this.athInCatRepository.save(data)
+    } catch (error) {
+      if (error?.code === '23505')
+        throw new BadRequestException({
+          status: 'Error',
+          mensaje: 'Este deportista ya esta asignado a esta categoria o temporada',
+        })
+      throw error
     }
   }
 
@@ -263,7 +274,7 @@ export class AthletesInCategoriesService {
       existsAthInCat,
       updateAthletesInCategoryDto,
     )
-    await this.athInCatRepository.save(athInCat)
+    await this.saveAssignment(athInCat)
     return {
       status: 'Success',
       mensaje: 'Deportista en categoria actualizado de forma exitosa',

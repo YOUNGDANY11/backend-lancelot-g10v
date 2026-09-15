@@ -34,8 +34,8 @@ export class Competency {
   @Column({ nullable: true })
   finish_date: Date
 
-  @Column({ nullable: true })
-  id_season?: number | null
+  @Column({ nullable: false })
+  id_season: number
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date
@@ -57,7 +57,7 @@ export class Competency {
   @JoinColumn({ name: 'id_category' })
   category: Category
 
-  @ManyToOne(() => Season, { nullable: true })
+  @ManyToOne(() => Season, { nullable: false })
   @JoinColumn({ name: 'id_season' })
-  season?: Season | null
+  season: Season
 }

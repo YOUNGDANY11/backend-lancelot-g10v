@@ -50,11 +50,11 @@ export class CreateCompetencyDto {
   })
   finish?: Date
 
-  @IsOptional()
   @Type(() => Number)
-  @ApiPropertyOptional({
+  @IsNotEmpty()
+  @ApiProperty({
     description: 'Id de la temporada a la que pertenece la competencia.',
     example: 1,
   })
-  id_season?: number
+  id_season: number
 }
