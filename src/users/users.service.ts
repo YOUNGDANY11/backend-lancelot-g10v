@@ -27,6 +27,16 @@ export class UsersService {
     return user
   }
 
+  async findAllAthleteIds(): Promise<number[]> {
+    const athletes = await this.usersRepository
+      .createQueryBuilder('user')
+      .innerJoin('user.role', 'role')
+      .where('role.code = :code', { code: 'DEPORTISTA' })
+      .select('user.id_user')
+      .getMany()
+    return athletes.map((athlete) => athlete.id_user)
+  }
+
   async findOneByEmail(email: string) {
     const user = await this.usersRepository.findOne({ where: { email } })
     return user

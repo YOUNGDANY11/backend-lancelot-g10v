@@ -20,6 +20,8 @@ import { TrainingSessionsModule } from './training_sessions/training-sessions.mo
 import { TrainingLoadsModule } from './training_loads/training-loads.module'
 import { MatchStatisticsModule } from './match_statistics/match-statistics.module'
 import { InjuriesModule } from './injuries/injuries.module'
+import { AcwrConfigModule } from './acwr_config/acwr-config.module'
+import { FatigueAlertsModule } from './fatigue_alerts/fatigue-alerts.module'
 
 @Module({
   imports: [
@@ -54,6 +56,8 @@ import { InjuriesModule } from './injuries/injuries.module'
     TrainingLoadsModule,
     MatchStatisticsModule,
     InjuriesModule,
+    AcwrConfigModule,
+    FatigueAlertsModule,
   ],
   controllers: [],
   providers: [],
