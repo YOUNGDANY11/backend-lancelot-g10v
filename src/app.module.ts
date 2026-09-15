@@ -25,6 +25,8 @@ import { FatigueAlertsModule } from './fatigue_alerts/fatigue-alerts.module'
 import { InjuryRiskAssessmentsModule } from './injury_risk_assessments/injury-risk-assessments.module'
 import { PositionWeightProfilesModule } from './position_weight_profiles/position-weight-profiles.module'
 import { WeightedProgressIndexModule } from './weighted_progress_index/weighted-progress-index.module'
+import { TalentFlagsModule } from './talent_flags/talent-flags.module'
+import { ReportsModule } from './reports/reports.module'
 
 @Module({
   imports: [
@@ -64,6 +66,8 @@ import { WeightedProgressIndexModule } from './weighted_progress_index/weighted-
     InjuryRiskAssessmentsModule,
     PositionWeightProfilesModule,
     WeightedProgressIndexModule,
+    TalentFlagsModule,
+    ReportsModule,
   ],
   controllers: [],
   providers: [],
