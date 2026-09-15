@@ -31,12 +31,21 @@ export class AthletesInCategoriesService {
     return athInCat
   }
 
-  async findOneByIdUser(id_user: number) {
+  async findOneByIdUser(id_user: number, id_season?: number) {
     const athInCat = await this.athInCatRepository.findOne({
-      where: { id_user },
+      where: id_season ? { id_user, id_season } : { id_user },
       relations: { user: true },
+      order: { created_at: 'DESC' },
     })
     return athInCat
+  }
+
+  async findHistoryByIdUser(id_user: number) {
+    return this.athInCatRepository.find({
+      where: { id_user },
+      relations: { user: true, category: true, season: true },
+      order: { created_at: 'ASC' },
+    })
   }
 
   async findAll(filters: FilterAthInCat) {
@@ -129,8 +138,8 @@ export class AthletesInCategoriesService {
     }
   }
 
-  async getByIdUser(id_user: number) {
-    const athInCat = await this.findOneByIdUser(id_user)
+  async getByIdUser(id_user: number, id_season?: number) {
+    const athInCat = await this.findOneByIdUser(id_user, id_season)
     if (!athInCat)
       throw new NotFoundException({
         status: 'Error',
@@ -140,6 +149,23 @@ export class AthletesInCategoriesService {
       status: 'Success',
       mensaje: 'Consulta de deportista en competencia exitosa',
       athInCat: plainToInstance(ResponseAthInCat, athInCat, {
+        excludeExtraneousValues: true,
+      }),
+    }
+  }
+
+  async getHistoryByIdUser(id_user: number) {
+    const existUser = await this.usersService.findOneById(id_user)
+    if (!existUser)
+      throw new NotFoundException({
+        status: 'Error',
+        mensaje: 'No existe este usuario',
+      })
+    const history = await this.findHistoryByIdUser(id_user)
+    return {
+      status: 'Success',
+      mensaje: 'Historial de categorías del deportista exitoso',
+      history: plainToInstance(ResponseAthInCat, history, {
         excludeExtraneousValues: true,
       }),
     }

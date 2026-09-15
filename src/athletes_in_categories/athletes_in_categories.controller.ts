@@ -19,6 +19,8 @@ import { JwtAuthGuard } from 'src/auth/guard/jwt-guard'
 import { RolesGuard } from 'src/auth/guard/roles.guard'
 import { Roles } from 'src/auth/decorators/roles.decorator'
 import { GetUser } from 'src/auth/decorators/get-user.decorator'
+import { assertOwnRecordOrStaff } from 'src/common/utils/ownership.util'
+import { User } from 'src/users/entities/user.entity'
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -73,6 +75,23 @@ export class AthletesInCategoriesController {
   @ApiNotFoundResponse({ description: 'La asignación no existe.' })
   findOneById(@Param('id', ParseIntPipe) id_ath_cat: number) {
     return this.athletesInCategoriesService.getById(id_ath_cat)
+  }
+
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'DEPORTISTA')
+  @Get('history/:id_user')
+  @ApiOperation({
+    summary: 'Consultar el historial de categorías de un deportista',
+    description:
+      'Devuelve todas las asignaciones del deportista ordenadas por temporada. Un DEPORTISTA solo puede consultar su propio historial.',
+  })
+  @ApiParam({ name: 'id_user', type: Number, example: 7 })
+  @ApiOkResponse({ type: AthleteInCategoryResponseDto, isArray: true })
+  history(
+    @Param('id_user', ParseIntPipe) id_user: number,
+    @GetUser() user: User,
+  ) {
+    assertOwnRecordOrStaff(user, id_user)
+    return this.athletesInCategoriesService.getHistoryByIdUser(id_user)
   }
 
   @Roles('DEPORTISTA')
