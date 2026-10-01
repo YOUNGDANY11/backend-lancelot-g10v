@@ -10,8 +10,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-// La fila con id_category NULL es la configuración global; las demás son
-// anulaciones por categoría etaria (como máximo una por categoría)
 @Index('UQ_acwr_thresholds_category', ['id_category'], {
   unique: true,
   where: 'id_category IS NOT NULL',

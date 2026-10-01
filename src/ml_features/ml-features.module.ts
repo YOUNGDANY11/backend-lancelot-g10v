@@ -7,6 +7,7 @@ import { InjuryRiskAssessment } from 'src/injury_risk_assessments/entities/injur
 import { MatchStatistic } from 'src/match_statistics/entities/match-statistic.entity'
 import { Season } from 'src/seasons/entities/season.entity'
 import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
+import { MlEngineModule } from 'src/ml_engine/ml-engine.module'
 import { User } from 'src/users/entities/user.entity'
 import { UsersModule } from 'src/users/users.module'
 import { AthleteDailyFeatures } from './entities/athlete-daily-features.entity'
@@ -30,6 +31,7 @@ import { MlFeaturesService } from './ml-features.service'
     ]),
     UsersModule,
     FatigueAlertsModule,
+    MlEngineModule,
   ],
   controllers: [MlFeaturesController],
   providers: [

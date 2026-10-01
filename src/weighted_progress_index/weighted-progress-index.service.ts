@@ -117,10 +117,6 @@ export class WeightedProgressIndexService {
     }
   }
 
-  /**
-   * Recalcula el índice de todos los deportistas asignados a una categoría en
-   * la temporada. Un error en un deportista no detiene el resto.
-   */
   async recalculateForSeason(id_season: number) {
     const season = await this.seasonsService.findOneById(id_season)
     if (!season)

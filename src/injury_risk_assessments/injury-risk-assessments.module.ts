@@ -11,6 +11,8 @@ import { InjuryRiskAssessmentsController } from './injury-risk-assessments.contr
 import { InjuryRiskAssessmentsCronService } from './injury-risk-assessments-cron.service'
 import { InjuryRiskAssessmentsService } from './injury-risk-assessments.service'
 import { InjuryRiskRulesService } from './injury-risk-rules.service'
+import { MlInjuryRiskPredictor } from './predictors/ml-injury-risk.predictor'
+import { RulesInjuryRiskPredictor } from './predictors/rules-injury-risk.predictor'
 
 @Module({
   imports: [
@@ -26,6 +28,9 @@ import { InjuryRiskRulesService } from './injury-risk-rules.service'
     InjuryRiskAssessmentsService,
     InjuryRiskAssessmentsCronService,
     InjuryRiskRulesService,
+    RulesInjuryRiskPredictor,
+    MlInjuryRiskPredictor,
   ],
+  exports: [RulesInjuryRiskPredictor, MlInjuryRiskPredictor],
 })
 export class InjuryRiskAssessmentsModule {}

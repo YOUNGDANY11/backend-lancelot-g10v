@@ -29,7 +29,6 @@ const CATEGORIES = [SUB17, SUB13, SUB15]
 
 const REFERENCE_DATE = new Date('2026-11-30T00:00:00Z')
 
-/** Deportista que cumple todo, sin contexto de edad (nace en julio, lejos de la edad máxima) */
 function baseInput(
   overrides: Partial<TalentDetectionInput> = {},
 ): TalentDetectionInput {
@@ -163,7 +162,6 @@ describe('TalentDetectionRulesService', () => {
       expect(result.warnings).toContain(
         'Sin índice de la temporada anterior: no se evaluó la mejora sostenida',
       )
-      // disponibilidad alcanza para el mínimo de 1 criterio de soporte
       expect(result.flagged).toBe(true)
     })
   })
@@ -242,7 +240,6 @@ describe('TalentDetectionRulesService', () => {
 
   describe('recommended_action (maturation context)', () => {
     it('suggests promotion to the next category when the athlete reaches the max age within the window', () => {
-      // Cumple 15 (edad máxima Sub-15) el 2027-03-10: dentro de 12 meses
       const result = service.evaluate(baseInput({ birth_date: '2012-03-10' }))
       expect(result.recommended_action).toBe('Evaluar ascenso a Sub-17')
     })
@@ -253,7 +250,6 @@ describe('TalentDetectionRulesService', () => {
     })
 
     it('suggests priority follow-up when the max age is beyond the window', () => {
-      // Cumple 15 el 2028-07-15: a más de 12 meses
       const result = service.evaluate(baseInput({ birth_date: '2013-07-15' }))
       expect(result.recommended_action).toBe(PRIORITY_FOLLOW_UP_ACTION)
     })

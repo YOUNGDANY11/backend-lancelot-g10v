@@ -32,7 +32,6 @@ describe('FeatureCalculatorService', () => {
 
   describe('computeEwma', () => {
     it('starts at the first value and applies lambda recursively', () => {
-      // 100 -> 0.25*200 + 0.75*100 = 125 -> 0.25*0 + 0.75*125 = 93.75
       expect(service.computeEwma([100, 200, 0], 0.25)).toBeCloseTo(93.75)
     })
 
@@ -85,18 +84,13 @@ describe('FeatureCalculatorService', () => {
     })
 
     it('divides the daily mean by the daily standard deviation', () => {
-      // media 200, desviación poblacional 100 -> monotonía 2
       expect(service.computeMonotony([100, 300, 100, 300])).toBe(2)
     })
   })
 
   describe('computeLoadFeatures', () => {
     it('computes strain as weekly load x monotony', () => {
-      const records = [
-        daily(0, 5, 60), // 300
-        daily(1, 5, 60), // 300
-        daily(2, 5, 60), // 300
-      ]
+      const records = [daily(0, 5, 60), daily(1, 5, 60), daily(2, 5, 60)]
       const features = service.computeLoadFeatures(records, [], DATE)
       const weekLoads = [300, 300, 300, 0, 0, 0, 0]
       const monotony = service.computeMonotony(weekLoads) as number
@@ -124,8 +118,8 @@ describe('FeatureCalculatorService', () => {
       const records = [
         daily(0, 9, 60, 'match'),
         daily(3, 6, 60),
-        daily(10, 8, 60), // fuera de 7 días, dentro de 14
-        daily(20, 9, 60), // fuera de 14 días
+        daily(10, 8, 60),
+        daily(20, 9, 60),
       ]
       const features = service.computeLoadFeatures(records, [], DATE)
       expect(features.sessions_7d).toBe(2)

@@ -36,7 +36,6 @@ export class FatigueAlertsCronService {
     const athleteIds = await this.usersService.findAllAthleteIds()
     const categoryByUser =
       await this.athletesInCategoriesService.findActiveSeasonCategoryMap()
-    // Umbrales por categoría etaria, consultados una vez por ejecución
     const thresholdsCache = new ScopedConfigCache((id_category) =>
       this.acwrConfigService.getActive(id_category),
     )

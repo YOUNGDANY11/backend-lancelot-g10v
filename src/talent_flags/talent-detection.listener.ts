@@ -7,10 +7,6 @@ import {
 } from 'src/seasons/seasons.service'
 import { TalentDetectionService } from './talent-detection.service'
 
-/**
- * Al cerrar una temporada ejecuta la detección automática de talento. Se usa
- * un evento para que SeasonsModule no dependa de TalentFlagsModule.
- */
 @Injectable()
 export class TalentDetectionListener {
   private readonly logger = new Logger(TalentDetectionListener.name)

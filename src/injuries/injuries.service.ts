@@ -38,7 +38,6 @@ export class InjuriesService {
       })
   }
 
-  // Diferencia en días (UTC) entre la fecha de lesión y la de recuperación
   private computeTimeLossDays(injury_date: string, recovery_date: string) {
     const start = Date.parse(`${injury_date.slice(0, 10)}T00:00:00Z`)
     const end = Date.parse(`${recovery_date.slice(0, 10)}T00:00:00Z`)

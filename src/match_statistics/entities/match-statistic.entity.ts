@@ -36,8 +36,6 @@ export class MatchStatistic {
   @Column({ type: 'smallint', default: 0 })
   red_cards: number
 
-  // RPE de la sesión de partido (0-10). Si está presente, el partido suma
-  // carga al ACWR como session-RPE = rpe x minutes_played (Foster et al., 2001)
   @Column({ type: 'smallint', nullable: true })
   rpe?: number | null
 

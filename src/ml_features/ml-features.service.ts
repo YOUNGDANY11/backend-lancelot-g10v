@@ -43,7 +43,6 @@ import {
 } from './feature-calculator.service'
 import { FeatureExportService } from './feature-export.service'
 
-// Rango máximo de un backfill o re-etiquetado en una sola petición
 export const MAX_RANGE_DAYS = 730
 const UPSERT_CHUNK_SIZE = 500
 
@@ -57,10 +56,6 @@ export interface FailedAthlete {
   mensaje: string
 }
 
-/**
- * Orquesta el snapshot diario de variables (dataset para la fase 2) y su
- * etiquetado retroactivo. Los cálculos viven en FeatureCalculatorService.
- */
 @Injectable()
 export class MlFeaturesService {
   private readonly logger = new Logger(MlFeaturesService.name)
@@ -102,15 +97,6 @@ export class MlFeaturesService {
       })
   }
 
-  // ---------------------------------------------------------------------------
-  // Snapshot de variables
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Crea o actualiza los snapshots de todos los deportistas entre from y to.
-   * Las columnas de etiqueta no se tocan al actualizar. Un error en un
-   * deportista no detiene el resto.
-   */
   async buildSnapshots(from: string, to: string) {
     const athleteIds = await this.usersService.findAllAthleteIds()
     if (athleteIds.length === 0)
@@ -235,15 +221,6 @@ export class MlFeaturesService {
     return rows.length
   }
 
-  // ---------------------------------------------------------------------------
-  // Etiquetado retroactivo
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Etiqueta las filas maduras (date + 7 <= hoy). Con onlyUnlabeled solo
-   * procesa las pendientes o con mecanismo desconocido (el club puede
-   * completar el mecanismo después); sin él re-etiqueta todo el rango.
-   */
   async labelRows(options: {
     from?: string
     to?: string
@@ -346,10 +323,6 @@ export class MlFeaturesService {
     return result
   }
 
-  // ---------------------------------------------------------------------------
-  // Endpoints
-  // ---------------------------------------------------------------------------
-
   async backfill(from: string, to: string) {
     this.validateRange(from, to)
     if (to > todayKey())
@@ -410,7 +383,6 @@ export class MlFeaturesService {
     }
   }
 
-  /** CSV seudonimizado del dataset (sin nombres, correos ni fecha de nacimiento) */
   async exportCsv(from: string, to: string): Promise<string> {
     this.validateRange(from, to)
     const salt = this.configService.get<string>('ML_EXPORT_SALT')
@@ -430,15 +402,6 @@ export class MlFeaturesService {
     )
   }
 
-  // ---------------------------------------------------------------------------
-  // Calidad de datos
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Indicadores de calidad de los datos del periodo. Si no se indica rango se
-   * usa el de los snapshots existentes. Los porcentajes con denominador 0 se
-   * devuelven en null con una advertencia.
-   */
   async computeDataQuality(fromInput?: string, toInput?: string) {
     const warnings: string[] = []
     const span = (await this.featuresRepository
@@ -458,7 +421,6 @@ export class MlFeaturesService {
         mensaje: 'La fecha inicial no puede ser posterior a la final',
       })
 
-    // --- Snapshots ---
     const snapshotStats = (await this.featuresRepository
       .createQueryBuilder('features')
       .select('COUNT(*)', 'snapshot_rows')
@@ -489,7 +451,6 @@ export class MlFeaturesService {
     if (Number(snapshotStats.snapshot_rows) === 0)
       warnings.push('No hay snapshots de variables en el periodo')
 
-    // --- Lesiones sin mecanismo ---
     const injuryStats = (await this.injuriesRepository
       .createQueryBuilder('injury')
       .select('COUNT(*)', 'total')
@@ -509,7 +470,6 @@ export class MlFeaturesService {
         'No hay lesiones en el periodo: no se calcula el porcentaje sin mecanismo',
       )
 
-    // --- Partidos sin RPE ---
     const matchStats = (await this.matchStatisticsRepository
       .createQueryBuilder('stat')
       .innerJoin('stat.match', 'match')
@@ -527,7 +487,6 @@ export class MlFeaturesService {
         'No hay estadísticas de partido en el periodo: no se calcula el porcentaje sin RPE',
       )
 
-    // --- Días sin registro de carga por deportista ---
     const athleteIds = await this.usersService.findAllAthleteIds()
     const periodDays = daysBetween(from, to) + 1
     const loadDaysByUser = await this.countLoadDaysByUser(athleteIds, from, to)
@@ -589,7 +548,6 @@ export class MlFeaturesService {
     }
   }
 
-  /** Días distintos con carga (entrenamiento o partido con RPE) por deportista */
   private async countLoadDaysByUser(
     athleteIds: number[],
     from: string,

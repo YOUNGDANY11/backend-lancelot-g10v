@@ -17,15 +17,12 @@ export enum TalentFlagStatus {
   DISMISSED = 'dismissed',
 }
 
-// Origen de la señalización: registrada por el cuerpo técnico, sugerida por
-// las reglas de detección (fase 1) o por un modelo de ML (fase 2)
 export enum TalentFlagSource {
   MANUAL = 'manual',
   RULES = 'rules',
   ML = 'ml',
 }
 
-// Una sola señalización por reglas por deportista y temporada (idempotencia)
 @Index('UQ_talent_flags_rules_user_season', ['id_user', 'id_season'], {
   unique: true,
   where: "source = 'rules'",
@@ -61,18 +58,15 @@ export class TalentFlag {
   })
   source: TalentFlagSource
 
-  // Percentil del índice en su cohorte (solo en señalizaciones automáticas)
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   score?: number | null
 
   @Column({ type: 'simple-array', nullable: true })
   triggered_rules?: string[] | null
 
-  // simple-json y no simple-array: las advertencias son texto libre con comas
   @Column({ type: 'simple-json', nullable: true })
   warnings?: string[] | null
 
-  // null = generada por el sistema
   @Column({ nullable: true })
   created_by?: number | null
 

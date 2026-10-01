@@ -27,10 +27,8 @@ export const DEFAULT_TALENT_DETECTION_THRESHOLDS: TalentDetectionThresholds = {
   near_max_age_months: 12,
 }
 
-// Cantidad de criterios de soporte que existen (mejora_sostenida y disponibilidad)
 export const SUPPORTING_CRITERIA_COUNT = 2
 
-// Por debajo de este tamaño el percentil de la cohorte es poco estable
 export const SMALL_COHORT_SIZE = 5
 
 export interface TalentCategoryInfo {
@@ -42,21 +40,16 @@ export interface TalentCategoryInfo {
 
 export interface TalentDetectionInput {
   index_value: number
-  /** Percentil del index_value dentro de la cohorte categoría + temporada */
   percentile: number
   cohort_size: number
   physical_score: number
   technical_score: number
   participation_score: number
-  /** index_value de la temporada anterior; null si no existe */
   previous_index_value: number | null
   had_severe_injury: boolean
-  /** YYYY-MM-DD; null si no está registrada */
   birth_date: string | null
-  /** Fecha de referencia para la edad (fin de temporada u hoy) */
   reference_date: Date
   category: TalentCategoryInfo
-  /** Todas las categorías del club, para encontrar la siguiente */
   categories: TalentCategoryInfo[]
   thresholds: TalentDetectionThresholds
 }
@@ -73,15 +66,6 @@ export interface TalentDetectionResult {
 export const PRIORITY_FOLLOW_UP_ACTION =
   'Seguimiento prioritario en su categoría actual'
 
-/**
- * Detección de jugadores con potencial de ascenso (fase 1, reglas).
- *
- * Siguiendo a Vaeyens et al. (2008), ningún indicador aislado basta: se exige
- * un índice alto en la cohorte Y un perfil sin dimensiones débiles, más al
- * menos un criterio de soporte (mejora o disponibilidad). La maduración y la
- * edad relativa no deciden la señalización, pero sí la acción y las
- * advertencias. El sistema sugiere; el director técnico decide.
- */
 @Injectable()
 export class TalentDetectionRulesService {
   private round2(value: number): number {
@@ -118,10 +102,6 @@ export class TalentDetectionRulesService {
     return higher[0] ?? null
   }
 
-  /**
-   * true si el deportista cumple la edad máxima de su categoría dentro de los
-   * próximos `months` meses (o ya la cumplió).
-   */
   isNearMaxAge(
     birth_date: string,
     max_age: number,
@@ -132,7 +112,6 @@ export class TalentDetectionRulesService {
     return reachesMaxAge <= this.addMonths(reference_date, months)
   }
 
-  /** Nacido en enero, febrero o marzo (efecto de edad relativa) */
   isBornInFirstQuarter(birth_date: string): boolean {
     return this.parseDate(birth_date).getUTCMonth() <= 2
   }
@@ -143,7 +122,6 @@ export class TalentDetectionRulesService {
     const lines: string[] = []
     const warnings: string[] = []
 
-    // --- Obligatorios ---
     const highPercentile = input.percentile >= thresholds.min_percentile
     if (highPercentile) triggered.push(TalentCriterionCode.HIGH_PERCENTILE)
     lines.push(
@@ -162,7 +140,6 @@ export class TalentDetectionRulesService {
       `Perfil multidimensional: físico ${this.format(input.physical_score)}; técnico ${this.format(input.technical_score)}; participación ${this.format(input.participation_score)} (mínimo ${thresholds.min_dimension_score} en cada dimensión): ${multidimensional ? 'cumple' : 'no cumple'}`,
     )
 
-    // --- De soporte ---
     let supporting = 0
     if (input.previous_index_value === null) {
       warnings.push(
@@ -199,7 +176,6 @@ export class TalentDetectionRulesService {
       multidimensional &&
       supporting >= thresholds.min_supporting_criteria
 
-    // --- Contexto: maduración y edad relativa ---
     if (input.cohort_size < SMALL_COHORT_SIZE)
       warnings.push(
         `Cohorte pequeña (${input.cohort_size} deportistas): el percentil es poco estable`,

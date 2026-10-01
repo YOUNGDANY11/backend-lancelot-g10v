@@ -19,11 +19,6 @@ export enum FeatureLabelQuality {
 
 export const FEATURE_VERSION = 'v1'
 
-/**
- * Snapshot diario de variables por deportista: dataset longitudinal para la
- * fase 2 (ML) del riesgo de lesión (Rossi et al., 2018; Van Eetvelde et al.,
- * 2021). Solo contiene variables numéricas y de contexto, nunca nombres.
- */
 @Index('UQ_athlete_daily_features_user_date', ['id_user', 'date'], {
   unique: true,
 })
@@ -32,7 +27,6 @@ export class AthleteDailyFeatures {
   @PrimaryGeneratedColumn()
   id_feature: number
 
-  // --- Identificación y contexto ---
   @Column()
   id_user: number
 
@@ -52,7 +46,6 @@ export class AthleteDailyFeatures {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   age_years?: number | null
 
-  // --- Carga (session-RPE, Foster et al., 2001) ---
   @Column({ type: 'decimal', precision: 8, scale: 2, default: 0 })
   acute_load_7d: number
 
@@ -83,7 +76,6 @@ export class AthleteDailyFeatures {
   @Column({ type: 'smallint', default: 0 })
   high_rpe_sessions_14d: number
 
-  // --- Historial médico ---
   @Column({ type: 'int', default: 0 })
   prior_injuries_count: number
 
@@ -99,11 +91,9 @@ export class AthleteDailyFeatures {
   @Column({ type: 'boolean', default: true })
   is_available: boolean
 
-  // --- Referencia de la fase 1 (null = sin alerta de reglas ese día) ---
   @Column({ type: 'enum', enum: InjuryRiskLevel, nullable: true })
   rules_risk_level?: InjuryRiskLevel | null
 
-  // --- Etiqueta: lesión sin contacto en los 7 días siguientes ---
   @Column({ type: 'boolean', nullable: true })
   label_injury_7d?: boolean | null
 
@@ -117,7 +107,6 @@ export class AthleteDailyFeatures {
   @Column({ type: 'timestamptz', nullable: true })
   labeled_at?: Date | null
 
-  // --- Metadatos ---
   @Column({ type: 'varchar', length: 10, default: FEATURE_VERSION })
   feature_version: string
 
@@ -127,7 +116,6 @@ export class AthleteDailyFeatures {
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date
 
-  // Si se elimina el usuario se eliminan sus datos (Ley 1581 de 2012)
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'id_user' })
   athlete: User

@@ -4,8 +4,6 @@ import { CategoriesService } from 'src/categories/categories.service'
 import { AcwrConfigService } from './acwr-config.service'
 import { AcwrThreshold } from './entities/acwr-threshold.entity'
 
-// @nestjs/typeorm se distribuye solo como ESM y Jest (CommonJS) no puede
-// cargarlo; los repositorios se inyectan a mano, así que basta un decorador vacío
 jest.mock('@nestjs/typeorm', () => ({
   InjectRepository: () => () => undefined,
 }))

@@ -30,7 +30,6 @@ export class AcwrConfigService implements OnApplicationBootstrap {
       await this.acwrThresholdsRepository.save({ id_category: null })
   }
 
-  // Configuración global: la fila con id_category NULL
   private async findActiveEntity() {
     const [threshold] = await this.acwrThresholdsRepository.find({
       where: { id_category: IsNull() },
@@ -67,10 +66,6 @@ export class AcwrConfigService implements OnApplicationBootstrap {
     )
   }
 
-  /**
-   * Umbrales de la categoría si tiene anulación; si no (o sin categoría), los
-   * globales. El resultado indica de dónde salieron.
-   */
   async getActive(
     id_category?: number | null,
   ): Promise<ScopedConfig<AcwrThreshold>> {
@@ -132,7 +127,6 @@ export class AcwrConfigService implements OnApplicationBootstrap {
       const existing = await this.findCategoryEntity(id_category)
       if (existing) threshold = existing
       else {
-        // La anulación parte de los valores globales vigentes
         const global = await this.getGlobal()
         threshold = this.acwrThresholdsRepository.create({
           id_category,

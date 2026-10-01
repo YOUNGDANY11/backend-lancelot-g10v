@@ -21,8 +21,6 @@ export enum InjuryStatus {
   RECOVERED = 'recovered',
 }
 
-// Mecanismo de la lesión: los modelos basados en carga solo aplican a
-// lesiones sin contacto (Rossi et al., 2018)
 export enum InjuryMechanism {
   CONTACTO = 'contacto',
   SIN_CONTACTO = 'sin_contacto',

@@ -2,19 +2,17 @@ import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { todayKey } from 'src/common/utils/date.util'
 import { extractErrorMessage } from 'src/common/utils/error-message.util'
+import { MlInferenceService } from 'src/ml_engine/ml-inference.service'
 import { MlFeaturesService } from './ml-features.service'
 
-/**
- * Flujo diario de las 5 AM, después de los crons de fatiga (3 AM) y de riesgo
- * por reglas (4 AM), para que el snapshot incluya el nivel de riesgo del día:
- * 1. Snapshot de variables de todos los deportistas para hoy.
- * 2. Etiquetado retroactivo de los días que ya cumplieron 7 días.
- */
 @Injectable()
 export class MlFeaturesCronService {
   private readonly logger = new Logger(MlFeaturesCronService.name)
 
-  constructor(private readonly mlFeaturesService: MlFeaturesService) {}
+  constructor(
+    private readonly mlFeaturesService: MlFeaturesService,
+    private readonly mlInferenceService: MlInferenceService,
+  ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_5AM)
   async runDailyFeaturePipeline() {
@@ -28,6 +26,19 @@ export class MlFeaturesCronService {
     } catch (error) {
       this.logger.error(
         `Error al generar el snapshot diario de variables: ${extractErrorMessage(error)}`,
+      )
+    }
+
+    try {
+      const inference = await this.mlInferenceService.runForDate(today)
+      this.logger.log(
+        inference.skipped_reason && inference.predicted === 0
+          ? `ML (${inference.engine}) omitido: ${inference.skipped_reason}`
+          : `ML (${inference.engine}): ${inference.predicted} predicciones, ${inference.assessments_created} evaluaciones creadas, ${inference.failed} fallos`,
+      )
+    } catch (error) {
+      this.logger.error(
+        `Error en la predicción diaria de ML: ${extractErrorMessage(error)}`,
       )
     }
 

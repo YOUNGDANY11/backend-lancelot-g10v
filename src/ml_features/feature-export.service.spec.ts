@@ -46,7 +46,6 @@ describe('FeatureExportService', () => {
       is_available: true,
       label_quality: 'pending',
       feature_version: 'v1',
-      // Campos que nunca deben exportarse
       name: 'Juan',
       email: 'juan@example.com',
       birth_date: '2012-03-28',

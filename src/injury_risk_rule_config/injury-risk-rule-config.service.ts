@@ -30,7 +30,6 @@ export class InjuryRiskRuleConfigService implements OnApplicationBootstrap {
       await this.injuryRiskRuleConfigRepository.save({ id_category: null })
   }
 
-  // Configuración global: la fila con id_category NULL
   private async findActiveEntity() {
     const [config] = await this.injuryRiskRuleConfigRepository.find({
       where: { id_category: IsNull() },
@@ -69,10 +68,6 @@ export class InjuryRiskRuleConfigService implements OnApplicationBootstrap {
     )
   }
 
-  /**
-   * Configuración de la categoría si tiene anulación; si no (o sin
-   * categoría), la global. El resultado indica de dónde salió.
-   */
   async getActive(
     id_category?: number | null,
   ): Promise<ScopedConfig<InjuryRiskRuleConfig>> {
@@ -146,7 +141,6 @@ export class InjuryRiskRuleConfigService implements OnApplicationBootstrap {
       const existing = await this.findCategoryEntity(id_category)
       if (existing) config = existing
       else {
-        // La anulación parte de los valores globales vigentes
         const global = await this.getGlobal()
         config = this.injuryRiskRuleConfigRepository.create({
           id_category,

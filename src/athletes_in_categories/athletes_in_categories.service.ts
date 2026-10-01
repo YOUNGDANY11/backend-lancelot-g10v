@@ -42,10 +42,6 @@ export class AthletesInCategoriesService {
     return athInCat
   }
 
-  /**
-   * Mapa id_user -> id_category de los deportistas asignados en la temporada
-   * activa. Vacío si no hay temporada activa. Una sola consulta para los crons.
-   */
   async findActiveSeasonCategoryMap(): Promise<Map<number, number>> {
     const season = await this.seasonsService.findCurrentActive()
     if (!season) return new Map()

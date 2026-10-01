@@ -14,17 +14,12 @@ import { InjuryMechanism } from 'src/injuries/entities/injury.entity'
 import { InjuryRiskLevel } from 'src/injury_risk_assessments/entities/injury-risk-assessment.entity'
 import { FeatureLabelQuality } from './entities/athlete-daily-features.entity'
 
-// Ventana de carga diaria usada para el ACWR exponencial (EWMA)
 export const EWMA_WINDOW_DAYS = 60
 export const ACUTE_EWMA_LAMBDA = 2 / (7 + 1)
 export const CHRONIC_EWMA_LAMBDA = 2 / (28 + 1)
-// Umbral fijo (no configurable) para que la variable no cambie de significado
-// si el club edita la configuración de las reglas
 export const HIGH_RPE_THRESHOLD = 8
 export const HIGH_RPE_WINDOW_DAYS = 14
-// Días posteriores al alta en que el deportista se considera en reintegro
 export const RETURN_TO_PLAY_WINDOW_DAYS = 28
-// Horizonte de la etiqueta: lesión sin contacto en los 7 días siguientes
 export const LABEL_WINDOW_DAYS = 7
 
 export interface FeatureInjury {
@@ -89,19 +84,12 @@ export interface FeatureLabel {
 
 export interface DailyFeaturesInput {
   date: string
-  /** Registros de carga (LoadRecordsService) de al menos los 60 días previos */
   records: TrainingLoadRecord[]
-  /** Todas las participaciones en partidos (con o sin RPE) */
   matchAppearances: FeatureMatchAppearance[]
   injuries: FeatureInjury[]
   context: FeatureContext
 }
 
-/**
- * Cálculo puro (sin BD) de las variables diarias de un deportista y de su
- * etiqueta. Solo usa información disponible hasta la fecha del snapshot,
- * para que no haya fuga de información futura hacia el modelo.
- */
 @Injectable()
 export class FeatureCalculatorService {
   constructor(private readonly acwrCalculatorService: AcwrCalculatorService) {}
@@ -114,7 +102,6 @@ export class FeatureCalculatorService {
     return date >= from && date <= to
   }
 
-  /** EWMA de una serie ordenada de la más antigua a la más reciente */
   computeEwma(values: number[], lambda: number): number {
     if (values.length === 0) return 0
     let ewma = values[0]
@@ -123,7 +110,6 @@ export class FeatureCalculatorService {
     return ewma
   }
 
-  /** ACWR exponencial (λ aguda 2/8, λ crónica 2/29) sobre los últimos 60 días */
   computeEwmaAcwr(
     dailyLoadMap: Map<string, number>,
     date: string,
@@ -139,10 +125,6 @@ export class FeatureCalculatorService {
     return this.round2(acute / chronic)
   }
 
-  /**
-   * Monotonía de Foster: media diaria / desviación estándar diaria de la
-   * semana (los días sin carga cuentan como 0). null si la desviación es 0.
-   */
   computeMonotony(dailyLoads: number[]): number | null {
     if (dailyLoads.length === 0) return null
     const mean = dailyLoads.reduce((sum, l) => sum + l, 0) / dailyLoads.length
@@ -220,11 +202,9 @@ export class FeatureCalculatorService {
         latest === null || i.injury_date > latest ? i.injury_date : latest,
       null,
     )
-    // No disponible: lesionado ese día y sin alta (o con alta posterior)
     const is_available = !prior.some(
       (i) => !i.recovery_date || i.recovery_date > date,
     )
-    // En reintegro: dado de alta en los últimos 28 días
     const is_recovering = prior.some(
       (i) =>
         !!i.recovery_date &&
@@ -248,7 +228,6 @@ export class FeatureCalculatorService {
     return this.round2(daysBetween(birth_date, date) / 365.25)
   }
 
-  /** Temporada que contiene la fecha; si hay varias, la de inicio más reciente */
   findSeasonForDate<T extends FeatureSeason>(
     seasons: T[],
     date: string,
@@ -275,16 +254,10 @@ export class FeatureCalculatorService {
     }
   }
 
-  /** true si la etiqueta del día ya se puede calcular (pasaron los 7 días) */
   isLabelMature(date: string, today: string): boolean {
     return addDaysToKey(date, LABEL_WINDOW_DAYS) <= today
   }
 
-  /**
-   * Etiqueta del día: lesión sin contacto en (date, date + 7]. Las lesiones
-   * por contacto no dependen de la carga y cuentan como negativo; si solo hay
-   * lesiones sin mecanismo registrado, la etiqueta queda desconocida.
-   */
   computeLabel(date: string, injuries: FeatureInjury[]): FeatureLabel {
     const windowEnd = addDaysToKey(date, LABEL_WINDOW_DAYS)
     const inWindow = injuries.filter(

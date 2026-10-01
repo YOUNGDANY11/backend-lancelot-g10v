@@ -15,7 +15,7 @@ import {
   InjuryRiskAssessment,
   InjuryRiskAssessmentMethod,
 } from './entities/injury-risk-assessment.entity'
-import { InjuryRiskRulesService } from './injury-risk-rules.service'
+import { RulesInjuryRiskPredictor } from './predictors/rules-injury-risk.predictor'
 
 @Injectable()
 export class InjuryRiskAssessmentsCronService {
@@ -29,7 +29,7 @@ export class InjuryRiskAssessmentsCronService {
     private readonly usersService: UsersService,
     private readonly acwrConfigService: AcwrConfigService,
     private readonly injuryRiskRuleConfigService: InjuryRiskRuleConfigService,
-    private readonly injuryRiskRulesService: InjuryRiskRulesService,
+    private readonly rulesInjuryRiskPredictor: RulesInjuryRiskPredictor,
     private readonly loadRecordsService: LoadRecordsService,
     private readonly athletesInCategoriesService: AthletesInCategoriesService,
   ) {}
@@ -40,7 +40,6 @@ export class InjuryRiskAssessmentsCronService {
     const athleteIds = await this.usersService.findAllAthleteIds()
     const categoryByUser =
       await this.athletesInCategoriesService.findActiveSeasonCategoryMap()
-    // Umbrales por categoría etaria, consultados una vez por ejecución
     const acwrCache = new ScopedConfigCache((id_category) =>
       this.acwrConfigService.getActive(id_category),
     )
@@ -100,7 +99,7 @@ export class InjuryRiskAssessmentsCronService {
         where: { id_user, status: InjuryStatus.RECOVERING },
       })) > 0
 
-    const result = this.injuryRiskRulesService.evaluate({
+    const result = await this.rulesInjuryRiskPredictor.predict({
       records,
       referenceDate,
       isRecoveringFromInjury,
@@ -127,11 +126,15 @@ export class InjuryRiskAssessmentsCronService {
       },
     })
 
-    if (result.triggeredRules.length === 0 || !result.riskLevel) return
+    if (!result.triggered_rules?.length || !result.riskLevel) return
 
     const dateKey = referenceDate.toISOString().slice(0, 10)
     const alreadyExists = await this.injuryRiskAssessmentsRepository.findOne({
-      where: { id_user, assessment_date: dateKey },
+      where: {
+        id_user,
+        assessment_date: dateKey,
+        method: InjuryRiskAssessmentMethod.RULES,
+      },
     })
     if (alreadyExists) return
 
@@ -140,9 +143,9 @@ export class InjuryRiskAssessmentsCronService {
       assessment_date: dateKey,
       method: InjuryRiskAssessmentMethod.RULES,
       risk_level: result.riskLevel,
-      triggered_rules: result.triggeredRules,
-      details: result.details.join('; '),
-      acwr_value: result.acwrValue,
+      triggered_rules: result.triggered_rules,
+      details: result.factors.join('; '),
+      acwr_value: result.acwr_value ?? null,
     })
   }
 }

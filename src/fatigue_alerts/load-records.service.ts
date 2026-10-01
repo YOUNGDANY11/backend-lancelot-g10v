@@ -5,11 +5,6 @@ import { MatchStatistic } from 'src/match_statistics/entities/match-statistic.en
 import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
 import { TrainingLoadRecord } from './acwr-calculator.service'
 
-/**
- * Fuente única de registros de carga (session-RPE, Foster et al., 2001) para
- * el ACWR, las reglas de riesgo y el snapshot de variables. Une las cargas de
- * entrenamiento con las de partido; un partido solo suma carga si tiene RPE.
- */
 @Injectable()
 export class LoadRecordsService {
   constructor(
@@ -19,10 +14,6 @@ export class LoadRecordsService {
     private readonly matchStatisticsRepository: Repository<MatchStatistic>,
   ) {}
 
-  /**
-   * Registros de carga del deportista entre from y to (YYYY-MM-DD, ambos
-   * incluidos), ordenados por fecha.
-   */
   async getRecords(
     id_user: number,
     from: string,
@@ -67,10 +58,6 @@ export class LoadRecordsService {
     )
   }
 
-  /**
-   * Minutos jugados por partido entre from y to (YYYY-MM-DD), tengan o no RPE.
-   * Sirve para variables de exposición a partidos, no para la carga.
-   */
   async getMatchAppearances(
     id_user: number,
     from: string,

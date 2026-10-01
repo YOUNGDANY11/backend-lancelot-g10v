@@ -32,6 +32,8 @@ async function bootstrap() {
     .addTag('Señalizaciones de talento')
     .addTag('Configuración de detección de talento')
     .addTag('ML - Variables diarias')
+    .addTag('ML - Motor y readiness')
+    .addTag('ML - Registro de modelos')
     .addBearerAuth(
       {
         type: 'http',
@@ -41,6 +43,16 @@ async function bootstrap() {
           'Token JWT obtenido mediante el endpoint de inicio de sesión.',
       },
       'bearerAuth',
+    )
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'x-api-key',
+        in: 'header',
+        description:
+          'Clave del microservicio de ML (ML_SERVICE_API_KEY), solo para sus endpoints',
+      },
+      'mlServiceApiKey',
     )
     .build()
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig)

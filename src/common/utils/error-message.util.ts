@@ -1,9 +1,5 @@
 import { HttpException } from '@nestjs/common'
 
-/**
- * Mensaje legible de un error: el `mensaje` de las excepciones HTTP de la API
- * ({ status: 'Error', mensaje }) o el message de cualquier otro error.
- */
 export function extractErrorMessage(error: unknown): string {
   if (error instanceof HttpException) {
     const response = error.getResponse()

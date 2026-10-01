@@ -34,7 +34,6 @@ export class TalentRuleConfigService implements OnApplicationBootstrap {
       await this.talentRuleConfigRepository.save({ id_category: null })
   }
 
-  // Configuración global: la fila con id_category NULL
   private async findActiveEntity() {
     const [config] = await this.talentRuleConfigRepository.find({
       where: { id_category: IsNull() },
@@ -71,7 +70,6 @@ export class TalentRuleConfigService implements OnApplicationBootstrap {
     )
   }
 
-  /** Convierte la entidad (decimales de Postgres llegan como texto) a umbrales numéricos */
   toThresholds(config: TalentRuleConfig): TalentDetectionThresholds {
     return {
       min_percentile: Number(config.min_percentile),
@@ -84,10 +82,6 @@ export class TalentRuleConfigService implements OnApplicationBootstrap {
     }
   }
 
-  /**
-   * Configuración de la categoría si tiene anulación; si no (o sin
-   * categoría), la global. El resultado indica de dónde salió.
-   */
   async getActive(
     id_category?: number | null,
   ): Promise<ScopedConfig<TalentRuleConfig>> {
@@ -156,7 +150,6 @@ export class TalentRuleConfigService implements OnApplicationBootstrap {
       const existing = await this.findCategoryEntity(id_category)
       if (existing) config = existing
       else {
-        // La anulación parte de los valores globales vigentes
         const global = await this.getGlobal()
         config = this.talentRuleConfigRepository.create({
           id_category,

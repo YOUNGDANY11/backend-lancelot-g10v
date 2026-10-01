@@ -1,14 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { createHmac } from 'crypto'
 
-// Longitud (en caracteres hexadecimales) de la clave seudónima exportada
 export const PSEUDONYM_LENGTH = 16
 
-/**
- * Columnas del CSV exportado, en orden. No incluye nombres, correos, fecha de
- * nacimiento ni id_user (Ley 1581 de 2012): el deportista se identifica con
- * una clave seudónima estable (HMAC-SHA256 con ML_EXPORT_SALT).
- */
 export const EXPORT_COLUMNS = [
   'athlete_key',
   'date',
@@ -37,10 +31,8 @@ export const EXPORT_COLUMNS = [
   'feature_version',
 ] as const
 
-/** Exportación seudonimizada del dataset (lógica pura, sin BD) */
 @Injectable()
 export class FeatureExportService {
-  /** Clave seudónima: HMAC-SHA256(salt, id_user) truncado */
   pseudonymize(id_user: number, salt: string): string {
     return createHmac('sha256', salt)
       .update(String(id_user))
@@ -63,10 +55,6 @@ export class FeatureExportService {
     return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
   }
 
-  /**
-   * Convierte filas del snapshot (con id_user) en CSV seudonimizado. Solo se
-   * escriben las columnas de EXPORT_COLUMNS; cualquier otro campo se descarta.
-   */
   toCsv(
     rows: (Record<string, unknown> & { id_user: number })[],
     salt: string,

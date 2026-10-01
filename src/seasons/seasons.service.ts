@@ -41,10 +41,6 @@ export class SeasonsService {
     return this.seasonsRepository.findOne({ where: { id_season } })
   }
 
-  /**
-   * Temporada en curso: la de estado 'active'. Si por error hay varias
-   * activas, se toma la de start_date más reciente.
-   */
   async findCurrentActive() {
     return this.seasonsRepository.findOne({
       where: { status: SeasonStatus.ACTIVE },
@@ -52,7 +48,6 @@ export class SeasonsService {
     })
   }
 
-  /** Temporada inmediatamente anterior (por start_date) a la indicada */
   async findPrevious(season: Season) {
     return this.seasonsRepository.findOne({
       where: { start_date: LessThan(season.start_date) },
@@ -129,7 +124,6 @@ export class SeasonsService {
     const updated = this.seasonsRepository.merge(season, updateSeasonDto)
     this.validateDateRange(updated.start_date, updated.end_date)
     await this.seasonsRepository.save(updated)
-    // Al cerrar la temporada se dispara la detección automática de talento
     if (
       previousStatus !== SeasonStatus.CLOSED &&
       updated.status === SeasonStatus.CLOSED

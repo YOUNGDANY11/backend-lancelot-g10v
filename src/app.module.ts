@@ -31,6 +31,7 @@ import { ReportsModule } from './reports/reports.module'
 import { InjuryRiskRuleConfigModule } from './injury_risk_rule_config/injury-risk-rule-config.module'
 import { TalentRuleConfigModule } from './talent_rule_config/talent-rule-config.module'
 import { MlFeaturesModule } from './ml_features/ml-features.module'
+import { MlEngineModule } from './ml_engine/ml-engine.module'
 
 @Module({
   imports: [
@@ -76,6 +77,7 @@ import { MlFeaturesModule } from './ml_features/ml-features.module'
     InjuryRiskRuleConfigModule,
     TalentRuleConfigModule,
     MlFeaturesModule,
+    MlEngineModule,
   ],
   controllers: [],
   providers: [],

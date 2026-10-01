@@ -4,8 +4,6 @@ import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
 import { AcwrCalculatorService } from './acwr-calculator.service'
 import { LoadRecordsService } from './load-records.service'
 
-// @nestjs/typeorm se distribuye solo como ESM y Jest (CommonJS) no puede
-// cargarlo; los repositorios se inyectan a mano, así que basta un decorador vacío
 jest.mock('@nestjs/typeorm', () => ({
   InjectRepository: () => () => undefined,
 }))

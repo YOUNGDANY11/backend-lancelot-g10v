@@ -3,7 +3,6 @@ import { Expose, Transform } from 'class-transformer'
 import { InjuryRiskLevel } from 'src/injury_risk_assessments/entities/injury-risk-assessment.entity'
 import { FeatureLabelQuality } from '../entities/athlete-daily-features.entity'
 
-// Los decimales de Postgres llegan como texto; se devuelven como número
 const toNumber = ({ value }: { value: unknown }) =>
   value === null || value === undefined ? null : Number(value)
 

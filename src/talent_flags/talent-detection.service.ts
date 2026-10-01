@@ -18,12 +18,6 @@ import {
 } from './entities/talent-flag.entity'
 import { TalentDetectionRulesService } from './talent-detection-rules.service'
 
-/**
- * Orquesta la detección automática de talento de una temporada: recalcula los
- * índices, calcula el percentil de cada deportista en su cohorte (categoría +
- * temporada) y guarda las señalizaciones como sugerencias en estado open.
- * El sistema sugiere; el director técnico decide.
- */
 @Injectable()
 export class TalentDetectionService {
   private readonly logger = new Logger(TalentDetectionService.name)
@@ -57,7 +51,6 @@ export class TalentDetectionService {
     const recalculation =
       await this.weightedProgressIndexService.recalculateForSeason(id_season)
 
-    // Fecha de referencia para la edad y fin de la ventana de lesiones
     const today = new Date().toISOString().slice(0, 10)
     const seasonEnd = season.end_date ?? today
     const referenceDate = new Date(`${seasonEnd}T00:00:00Z`)
@@ -65,7 +58,6 @@ export class TalentDetectionService {
     const [indices, assignments, categories, previousSeason, existingFlags] =
       await Promise.all([
         this.weightedProgressIndexRepository.find({ where: { id_season } }),
-        // Solo se carga la fecha de nacimiento del deportista
         this.athletesInCategoryRepository
           .createQueryBuilder('assignment')
           .leftJoin('assignment.user', 'user')
@@ -111,7 +103,6 @@ export class TalentDetectionService {
     }))
     const categoryById = new Map(categoryInfos.map((c) => [c.id_category, c]))
 
-    // Cohortes: índices de la temporada agrupados por categoría
     const cohortValues = new Map<number, number[]>()
     for (const index of indices) {
       const assignment = assignmentByUser.get(index.id_user)
@@ -169,7 +160,6 @@ export class TalentDetectionService {
         const existing = existingFlagByUser.get(index.id_user)
         if (result.flagged) {
           flagged++
-          // Una señalización ya revisada o descartada por el cuerpo técnico no se toca
           if (existing && existing.status !== TalentFlagStatus.OPEN) {
             skipped++
             continue
@@ -190,7 +180,6 @@ export class TalentDetectionService {
           if (existing) updated++
           else created++
         } else if (existing && existing.status === TalentFlagStatus.OPEN) {
-          // Sugerencia aún sin revisar que ya no cumple los criterios
           await this.talentFlagsRepository.remove(existing)
           removed++
         }
