@@ -4,9 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { AcwrConfigService } from 'src/acwr_config/acwr-config.service'
 import { CHRONIC_WINDOW_DAYS } from 'src/fatigue_alerts/acwr-calculator.service'
+import { LoadRecordsService } from 'src/fatigue_alerts/load-records.service'
 import { InjuryRiskRuleConfig } from 'src/injury_risk_rule_config/entities/injury-risk-rule-config.entity'
 import { InjuryRiskRuleConfigService } from 'src/injury_risk_rule_config/injury-risk-rule-config.service'
-import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
 import { Injury, InjuryStatus } from 'src/injuries/entities/injury.entity'
 import { UsersService } from 'src/users/users.service'
 import {
@@ -20,8 +20,6 @@ export class InjuryRiskAssessmentsCronService {
   private readonly logger = new Logger(InjuryRiskAssessmentsCronService.name)
 
   constructor(
-    @InjectRepository(TrainingLoad)
-    private readonly trainingLoadsRepository: Repository<TrainingLoad>,
     @InjectRepository(Injury)
     private readonly injuriesRepository: Repository<Injury>,
     @InjectRepository(InjuryRiskAssessment)
@@ -30,6 +28,7 @@ export class InjuryRiskAssessmentsCronService {
     private readonly acwrConfigService: AcwrConfigService,
     private readonly injuryRiskRuleConfigService: InjuryRiskRuleConfigService,
     private readonly injuryRiskRulesService: InjuryRiskRulesService,
+    private readonly loadRecordsService: LoadRecordsService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_4AM)
@@ -40,12 +39,19 @@ export class InjuryRiskAssessmentsCronService {
     const ruleThresholds = await this.injuryRiskRuleConfigService.getActive()
 
     for (const id_user of athleteIds) {
-      await this.processAthlete(
-        id_user,
-        referenceDate,
-        acwrThresholds,
-        ruleThresholds,
-      )
+      try {
+        await this.processAthlete(
+          id_user,
+          referenceDate,
+          acwrThresholds,
+          ruleThresholds,
+        )
+      } catch (error) {
+        this.logger.error(
+          `Error al evaluar el riesgo de lesión del deportista ${id_user}`,
+          error instanceof Error ? error.stack : String(error),
+        )
+      }
     }
 
     this.logger.log(
@@ -70,23 +76,11 @@ export class InjuryRiskAssessmentsCronService {
     const windowStart = new Date(referenceDate)
     windowStart.setUTCDate(windowStart.getUTCDate() - (lookbackDays - 1))
 
-    const loads = await this.trainingLoadsRepository
-      .createQueryBuilder('load')
-      .innerJoinAndSelect('load.session', 'session')
-      .where('load.id_user = :id_user', { id_user })
-      .andWhere('session.date >= :windowStart', {
-        windowStart: windowStart.toISOString().slice(0, 10),
-      })
-      .andWhere('session.date <= :referenceDate', {
-        referenceDate: referenceDate.toISOString().slice(0, 10),
-      })
-      .getMany()
-
-    const records = loads.map((load) => ({
-      date: load.session.date,
-      rpe: load.rpe,
-      duration_min: load.duration_min,
-    }))
+    const records = await this.loadRecordsService.getRecords(
+      id_user,
+      windowStart.toISOString().slice(0, 10),
+      referenceDate.toISOString().slice(0, 10),
+    )
 
     const isRecoveringFromInjury =
       (await this.injuriesRepository.count({
@@ -103,7 +97,9 @@ export class InjuryRiskAssessmentsCronService {
         medium_max: Number(acwrThresholds.medium_max),
       },
       ruleThresholds: {
-        sustained_acwr_threshold: Number(ruleThresholds.sustained_acwr_threshold),
+        sustained_acwr_threshold: Number(
+          ruleThresholds.sustained_acwr_threshold,
+        ),
         sustained_acwr_min_days: Number(ruleThresholds.sustained_acwr_min_days),
         sustained_acwr_lookback_days: Number(
           ruleThresholds.sustained_acwr_lookback_days,

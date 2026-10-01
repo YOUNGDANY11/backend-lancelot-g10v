@@ -3,7 +3,6 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { AcwrConfigService } from 'src/acwr_config/acwr-config.service'
-import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
 import { UsersService } from 'src/users/users.service'
 import {
   AcwrCalculatorService,
@@ -13,19 +12,19 @@ import {
   FatigueAlert,
   FatigueAlertLevel,
 } from './entities/fatigue-alert.entity'
+import { LoadRecordsService } from './load-records.service'
 
 @Injectable()
 export class FatigueAlertsCronService {
   private readonly logger = new Logger(FatigueAlertsCronService.name)
 
   constructor(
-    @InjectRepository(TrainingLoad)
-    private readonly trainingLoadsRepository: Repository<TrainingLoad>,
     @InjectRepository(FatigueAlert)
     private readonly fatigueAlertsRepository: Repository<FatigueAlert>,
     private readonly usersService: UsersService,
     private readonly acwrConfigService: AcwrConfigService,
     private readonly acwrCalculatorService: AcwrCalculatorService,
+    private readonly loadRecordsService: LoadRecordsService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
@@ -35,7 +34,14 @@ export class FatigueAlertsCronService {
     const thresholds = await this.acwrConfigService.getActive()
 
     for (const id_user of athleteIds) {
-      await this.processAthlete(id_user, referenceDate, thresholds)
+      try {
+        await this.processAthlete(id_user, referenceDate, thresholds)
+      } catch (error) {
+        this.logger.error(
+          `Error al calcular ACWR/fatiga del deportista ${id_user}`,
+          error instanceof Error ? error.stack : String(error),
+        )
+      }
     }
 
     this.logger.log(
@@ -51,23 +57,11 @@ export class FatigueAlertsCronService {
     const windowStart = new Date(referenceDate)
     windowStart.setUTCDate(windowStart.getUTCDate() - (CHRONIC_WINDOW_DAYS - 1))
 
-    const loads = await this.trainingLoadsRepository
-      .createQueryBuilder('load')
-      .innerJoinAndSelect('load.session', 'session')
-      .where('load.id_user = :id_user', { id_user })
-      .andWhere('session.date >= :windowStart', {
-        windowStart: windowStart.toISOString().slice(0, 10),
-      })
-      .andWhere('session.date <= :referenceDate', {
-        referenceDate: referenceDate.toISOString().slice(0, 10),
-      })
-      .getMany()
-
-    const records = loads.map((load) => ({
-      date: load.session.date,
-      rpe: load.rpe,
-      duration_min: load.duration_min,
-    }))
+    const records = await this.loadRecordsService.getRecords(
+      id_user,
+      windowStart.toISOString().slice(0, 10),
+      referenceDate.toISOString().slice(0, 10),
+    )
 
     const result = this.acwrCalculatorService.calculate(
       records,
