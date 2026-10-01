@@ -30,6 +30,7 @@ import { TalentFlagsModule } from './talent_flags/talent-flags.module'
 import { ReportsModule } from './reports/reports.module'
 import { InjuryRiskRuleConfigModule } from './injury_risk_rule_config/injury-risk-rule-config.module'
 import { TalentRuleConfigModule } from './talent_rule_config/talent-rule-config.module'
+import { MlFeaturesModule } from './ml_features/ml-features.module'
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { TalentRuleConfigModule } from './talent_rule_config/talent-rule-config.
     ReportsModule,
     InjuryRiskRuleConfigModule,
     TalentRuleConfigModule,
+    MlFeaturesModule,
   ],
   controllers: [],
   providers: [],

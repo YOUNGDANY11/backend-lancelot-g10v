@@ -31,6 +31,7 @@ async function bootstrap() {
     .addTag('Índice de progreso ponderado')
     .addTag('Señalizaciones de talento')
     .addTag('Configuración de detección de talento')
+    .addTag('ML - Variables diarias')
     .addBearerAuth(
       {
         type: 'http',

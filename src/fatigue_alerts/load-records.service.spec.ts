@@ -127,4 +127,27 @@ describe('LoadRecordsService', () => {
       to: '2026-03-28',
     })
   })
+
+  describe('getMatchAppearances', () => {
+    it('returns the minutes of every match, with or without RPE', async () => {
+      const { service, matchQb } = buildService(
+        [],
+        [
+          { rpe: null, minutes_played: 90, match: { date: '2026-03-02' } },
+          { rpe: 6, minutes_played: 45, match: { date: '2026-03-05' } },
+        ],
+      )
+      const appearances = await service.getMatchAppearances(
+        7,
+        '2026-03-01',
+        '2026-03-28',
+      )
+
+      expect(appearances).toEqual([
+        { date: '2026-03-02', minutes_played: 90 },
+        { date: '2026-03-05', minutes_played: 45 },
+      ])
+      expect(matchQb.andWhere).not.toHaveBeenCalledWith('stat.rpe IS NOT NULL')
+    })
+  })
 })

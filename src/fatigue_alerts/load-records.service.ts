@@ -66,4 +66,26 @@ export class LoadRecordsService {
       a.date.localeCompare(b.date),
     )
   }
+
+  /**
+   * Minutos jugados por partido entre from y to (YYYY-MM-DD), tengan o no RPE.
+   * Sirve para variables de exposición a partidos, no para la carga.
+   */
+  async getMatchAppearances(
+    id_user: number,
+    from: string,
+    to: string,
+  ): Promise<{ date: string; minutes_played: number }[]> {
+    const stats = await this.matchStatisticsRepository
+      .createQueryBuilder('stat')
+      .innerJoinAndSelect('stat.match', 'match')
+      .where('stat.id_user = :id_user', { id_user })
+      .andWhere('match.date >= :from', { from })
+      .andWhere('match.date <= :to', { to })
+      .getMany()
+    return stats.map((stat) => ({
+      date: stat.match.date,
+      minutes_played: Number(stat.minutes_played),
+    }))
+  }
 }
