@@ -28,6 +28,9 @@ async function bootstrap() {
     .addTag('Asignaciones a competencias')
     .addTag('Partidos')
     .addTag('Roles')
+    .addTag('Índice de progreso ponderado')
+    .addTag('Señalizaciones de talento')
+    .addTag('Configuración de detección de talento')
     .addBearerAuth(
       {
         type: 'http',
