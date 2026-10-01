@@ -10,7 +10,7 @@ import { CreateSeasonDto } from './dto/create-season.dto'
 import { FilterSeasonDto } from './dto/filter-season.dto'
 import { ResponseSeasonDto } from './dto/response-season.dto'
 import { UpdateSeasonDto } from './dto/update-season.dto'
-import { Season } from './entities/season.entity'
+import { Season, SeasonStatus } from './entities/season.entity'
 
 @Injectable()
 export class SeasonsService {
@@ -31,6 +31,17 @@ export class SeasonsService {
 
   async findOneById(id_season: number) {
     return this.seasonsRepository.findOne({ where: { id_season } })
+  }
+
+  /**
+   * Temporada en curso: la de estado 'active'. Si por error hay varias
+   * activas, se toma la de start_date más reciente.
+   */
+  async findCurrentActive() {
+    return this.seasonsRepository.findOne({
+      where: { status: SeasonStatus.ACTIVE },
+      order: { start_date: 'DESC', id_season: 'DESC' },
+    })
   }
 
   async findAll(filters: FilterSeasonDto) {

@@ -3,6 +3,8 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { AcwrConfigService } from 'src/acwr_config/acwr-config.service'
+import { AthletesInCategoriesService } from 'src/athletes_in_categories/athletes_in_categories.service'
+import { ScopedConfigCache } from 'src/common/scoped_config/scoped-config'
 import { UsersService } from 'src/users/users.service'
 import {
   AcwrCalculatorService,
@@ -25,16 +27,25 @@ export class FatigueAlertsCronService {
     private readonly acwrConfigService: AcwrConfigService,
     private readonly acwrCalculatorService: AcwrCalculatorService,
     private readonly loadRecordsService: LoadRecordsService,
+    private readonly athletesInCategoriesService: AthletesInCategoriesService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_3AM)
   async recalculateFatigueAlerts() {
     const referenceDate = new Date()
     const athleteIds = await this.usersService.findAllAthleteIds()
-    const thresholds = await this.acwrConfigService.getActive()
+    const categoryByUser =
+      await this.athletesInCategoriesService.findActiveSeasonCategoryMap()
+    // Umbrales por categoría etaria, consultados una vez por ejecución
+    const thresholdsCache = new ScopedConfigCache((id_category) =>
+      this.acwrConfigService.getActive(id_category),
+    )
 
     for (const id_user of athleteIds) {
       try {
+        const { config: thresholds } = await thresholdsCache.get(
+          categoryByUser.get(id_user),
+        )
         await this.processAthlete(id_user, referenceDate, thresholds)
       } catch (error) {
         this.logger.error(

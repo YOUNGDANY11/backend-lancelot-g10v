@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { AcwrConfigModule } from 'src/acwr_config/acwr-config.module'
+import { AthletesInCategoriesModule } from 'src/athletes_in_categories/athletes_in_categories.module'
 import { FatigueAlertsModule } from 'src/fatigue_alerts/fatigue-alerts.module'
 import { InjuryRiskRuleConfigModule } from 'src/injury_risk_rule_config/injury-risk-rule-config.module'
 import { Injury } from 'src/injuries/entities/injury.entity'
@@ -18,6 +19,7 @@ import { InjuryRiskRulesService } from './injury-risk-rules.service'
     AcwrConfigModule,
     FatigueAlertsModule,
     InjuryRiskRuleConfigModule,
+    AthletesInCategoriesModule,
   ],
   controllers: [InjuryRiskAssessmentsController],
   providers: [

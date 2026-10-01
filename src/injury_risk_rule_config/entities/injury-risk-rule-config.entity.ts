@@ -1,15 +1,28 @@
+import { Category } from 'src/categories/entities/category.entity'
 import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm'
 
+// La fila con id_category NULL es la configuración global; las demás son
+// anulaciones por categoría etaria (como máximo una por categoría)
+@Index('UQ_injury_risk_rule_configs_category', ['id_category'], {
+  unique: true,
+  where: 'id_category IS NOT NULL',
+})
 @Entity('injury_risk_rule_configs')
 export class InjuryRiskRuleConfig {
   @PrimaryGeneratedColumn()
   id_config: number
+
+  @Column({ nullable: true })
+  id_category?: number | null
 
   @Column({ type: 'decimal', precision: 4, scale: 2, default: 1.5 })
   sustained_acwr_threshold: number
@@ -34,4 +47,8 @@ export class InjuryRiskRuleConfig {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date
+
+  @ManyToOne(() => Category, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'id_category' })
+  category?: Category | null
 }

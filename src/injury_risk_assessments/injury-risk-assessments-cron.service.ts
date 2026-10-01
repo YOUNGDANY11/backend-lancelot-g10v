@@ -3,6 +3,8 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { AcwrConfigService } from 'src/acwr_config/acwr-config.service'
+import { AthletesInCategoriesService } from 'src/athletes_in_categories/athletes_in_categories.service'
+import { ScopedConfigCache } from 'src/common/scoped_config/scoped-config'
 import { CHRONIC_WINDOW_DAYS } from 'src/fatigue_alerts/acwr-calculator.service'
 import { LoadRecordsService } from 'src/fatigue_alerts/load-records.service'
 import { InjuryRiskRuleConfig } from 'src/injury_risk_rule_config/entities/injury-risk-rule-config.entity'
@@ -29,17 +31,28 @@ export class InjuryRiskAssessmentsCronService {
     private readonly injuryRiskRuleConfigService: InjuryRiskRuleConfigService,
     private readonly injuryRiskRulesService: InjuryRiskRulesService,
     private readonly loadRecordsService: LoadRecordsService,
+    private readonly athletesInCategoriesService: AthletesInCategoriesService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_4AM)
   async recalculateInjuryRiskAssessments() {
     const referenceDate = new Date()
     const athleteIds = await this.usersService.findAllAthleteIds()
-    const acwrThresholds = await this.acwrConfigService.getActive()
-    const ruleThresholds = await this.injuryRiskRuleConfigService.getActive()
+    const categoryByUser =
+      await this.athletesInCategoriesService.findActiveSeasonCategoryMap()
+    // Umbrales por categoría etaria, consultados una vez por ejecución
+    const acwrCache = new ScopedConfigCache((id_category) =>
+      this.acwrConfigService.getActive(id_category),
+    )
+    const rulesCache = new ScopedConfigCache((id_category) =>
+      this.injuryRiskRuleConfigService.getActive(id_category),
+    )
 
     for (const id_user of athleteIds) {
       try {
+        const id_category = categoryByUser.get(id_user)
+        const { config: acwrThresholds } = await acwrCache.get(id_category)
+        const { config: ruleThresholds } = await rulesCache.get(id_category)
         await this.processAthlete(
           id_user,
           referenceDate,
