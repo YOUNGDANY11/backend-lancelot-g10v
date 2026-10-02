@@ -34,10 +34,10 @@ export class AthleteDailyFeatures {
   @Column({ type: 'date' })
   date: string
 
-  @Column({ nullable: true })
+  @Column({ type: 'int', nullable: true })
   id_season?: number | null
 
-  @Column({ nullable: true })
+  @Column({ type: 'int', nullable: true })
   id_category?: number | null
 
   @Column({ type: 'varchar', length: 30, nullable: true })
