@@ -108,10 +108,12 @@ export class UsersController {
     return this.usersService.getById(id_user)
   }
 
+  @Roles('ADMIN', 'DIRECTOR_TECNICO', 'ENTRENADOR', 'ENCARGADO_SALUD')
   @Get('athletes')
   @ApiOperation({
     summary: 'Listar deportistas',
-    description: 'Disponible para cualquier usuario autenticado.',
+    description:
+      'Disponible para ADMIN, DIRECTOR_TECNICO, ENTRENADOR y ENCARGADO_SALUD.',
   })
   @ApiQuery({ type: FilterUserDto })
   @ApiOkResponse({ type: UsersPaginatedResponseDto })
