@@ -57,6 +57,30 @@ export class AthletesInCategoriesService {
     )
   }
 
+  async findActiveSeasonAssignment(id_user: number) {
+    const season = await this.seasonsService.findCurrentActive()
+    if (!season) return null
+    return this.athInCatRepository.findOne({
+      where: { id_user, id_season: season.id_season },
+    })
+  }
+
+  async findActiveSeasonRoster(id_category: number) {
+    const season = await this.seasonsService.findCurrentActive()
+    if (!season) return { season: null, roster: [] }
+    const roster = await this.athInCatRepository
+      .createQueryBuilder('assignment')
+      .leftJoin('assignment.user', 'user')
+      .addSelect(['user.id_user', 'user.name', 'user.lastname'])
+      .where('assignment.id_season = :id_season', {
+        id_season: season.id_season,
+      })
+      .andWhere('assignment.id_category = :id_category', { id_category })
+      .orderBy('user.lastname', 'ASC')
+      .getMany()
+    return { season, roster }
+  }
+
   async findHistoryByIdUser(id_user: number) {
     return this.athInCatRepository.find({
       where: { id_user },

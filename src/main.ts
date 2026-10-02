@@ -30,6 +30,7 @@ async function bootstrap() {
     .addTag('Roles')
     .addTag('Índice de progreso ponderado')
     .addTag('Señalizaciones de talento')
+    .addTag('Monitoreo de carga')
     .addTag('Configuración de detección de talento')
     .addTag('ML - Variables diarias')
     .addTag('ML - Motor y readiness')
