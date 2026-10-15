@@ -23,7 +23,10 @@ import { GetUser } from 'src/auth/decorators/get-user.decorator'
 import { Roles } from 'src/auth/decorators/roles.decorator'
 import { JwtAuthGuard } from 'src/auth/guard/jwt-guard'
 import { RolesGuard } from 'src/auth/guard/roles.guard'
-import { assertOwnRecordOrStaff, isDeportista } from 'src/common/utils/ownership.util'
+import {
+  assertOwnRecordOrStaff,
+  isDeportista,
+} from 'src/common/utils/ownership.util'
 import { User } from 'src/users/entities/user.entity'
 import { CreateTechnicalEvaluationDto } from './dto/create-technical-evaluation.dto'
 import { FilterTechnicalEvaluationDto } from './dto/filter-technical-evaluation.dto'

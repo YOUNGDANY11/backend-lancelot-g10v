@@ -1,3 +1,4 @@
+import { Sport } from 'src/common/sport/sport-rules'
 import { Season } from 'src/seasons/entities/season.entity'
 import { User } from 'src/users/entities/user.entity'
 import {
@@ -23,10 +24,14 @@ export enum TalentFlagSource {
   ML = 'ml',
 }
 
-@Index('UQ_talent_flags_rules_user_season', ['id_user', 'id_season'], {
-  unique: true,
-  where: "source = 'rules'",
-})
+@Index(
+  'UQ_talent_flags_rules_user_season_sport',
+  ['id_user', 'id_season', 'sport'],
+  {
+    unique: true,
+    where: "source = 'rules'",
+  },
+)
 @Entity('talent_flags')
 export class TalentFlag {
   @PrimaryGeneratedColumn()
@@ -37,6 +42,9 @@ export class TalentFlag {
 
   @Column()
   id_season: number
+
+  @Column({ type: 'enum', enum: Sport, nullable: true })
+  sport?: Sport | null
 
   @Column({ type: 'text' })
   criteria: string

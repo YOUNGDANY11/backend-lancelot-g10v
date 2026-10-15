@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { EvaluationDimension } from '../entities/technical-evaluation.entity'
+import { Sport } from 'src/common/sport/sport-rules'
 import { Type } from 'class-transformer'
 import {
   IsDateString,
@@ -38,6 +39,15 @@ export class CreateTechnicalEvaluationDto {
       'tecnica: dominio del balón (control, pase, remate…); tactica: comprensión del juego (posicionamiento, presión, rotaciones…)',
   })
   dimension?: EvaluationDimension
+
+  @IsOptional()
+  @IsEnum(Sport, { message: 'El deporte debe ser futbol o futbol_sala' })
+  @ApiPropertyOptional({
+    enum: Sport,
+    description:
+      'Deporte en el que se evaluó. Es obligatorio si el deportista juega fútbol y fútbol sala en la temporada; si juega solo uno, se toma ese.',
+  })
+  sport?: Sport
 
   @IsString()
   @IsNotEmpty()

@@ -1,3 +1,4 @@
+import { Sport } from 'src/common/sport/sport-rules'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 
@@ -20,6 +21,10 @@ export class ResponseWeightedProgressIndexDto {
   @Expose()
   @ApiProperty({ example: 1 })
   id_season: number
+
+  @Expose()
+  @ApiProperty({ enum: Sport, example: Sport.FUTBOL })
+  sport: Sport
 
   @Expose()
   @ApiProperty({ example: 1 })

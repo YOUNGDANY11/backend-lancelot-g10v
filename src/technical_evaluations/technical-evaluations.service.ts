@@ -13,6 +13,10 @@ import { FilterTechnicalEvaluationDto } from './dto/filter-technical-evaluation.
 import { ResponseTechnicalEvaluationDto } from './dto/response-technical-evaluation.dto'
 import { UpdateTechnicalEvaluationDto } from './dto/update-technical-evaluation.dto'
 import { TechnicalEvaluation } from './entities/technical-evaluation.entity'
+import {
+  resolveAthleteSport,
+  sportsOfAthleteSeason,
+} from 'src/common/sport/athlete-sports'
 
 @Injectable()
 export class TechnicalEvaluationsService {
@@ -67,6 +71,7 @@ export class TechnicalEvaluationsService {
       id_season,
       indicator,
       dimension,
+      sport,
       eval_date,
     } = filters
     const query = this.technicalEvaluationsRepository
@@ -88,6 +93,7 @@ export class TechnicalEvaluationsService {
       })
     if (dimension)
       query.andWhere('evaluation.dimension = :dimension', { dimension })
+    if (sport) query.andWhere('evaluation.sport = :sport', { sport })
     if (eval_date)
       query.andWhere('evaluation.eval_date = :eval_date', { eval_date })
 
@@ -158,9 +164,18 @@ export class TechnicalEvaluationsService {
       createTechnicalEvaluationDto.id_season,
       createTechnicalEvaluationDto.evaluator_id,
     )
-    const evaluation = await this.technicalEvaluationsRepository.save(
-      createTechnicalEvaluationDto,
+    const sport = resolveAthleteSport(
+      await sportsOfAthleteSeason(
+        this.technicalEvaluationsRepository.manager,
+        createTechnicalEvaluationDto.id_user,
+        createTechnicalEvaluationDto.id_season,
+      ),
+      createTechnicalEvaluationDto.sport,
     )
+    const evaluation = await this.technicalEvaluationsRepository.save({
+      ...createTechnicalEvaluationDto,
+      sport,
+    })
     return this.getById(evaluation.id_eval_tech)
   }
 
@@ -183,6 +198,19 @@ export class TechnicalEvaluationsService {
       updated.id_season,
       updated.evaluator_id,
     )
+    if (
+      updateTechnicalEvaluationDto.sport !== undefined ||
+      updateTechnicalEvaluationDto.id_user !== undefined ||
+      updateTechnicalEvaluationDto.id_season !== undefined
+    )
+      updated.sport = resolveAthleteSport(
+        await sportsOfAthleteSeason(
+          this.technicalEvaluationsRepository.manager,
+          updated.id_user,
+          updated.id_season,
+        ),
+        updateTechnicalEvaluationDto.sport ?? updated.sport,
+      )
     await this.technicalEvaluationsRepository.save(updated)
     return this.getById(id_eval_tech)
   }

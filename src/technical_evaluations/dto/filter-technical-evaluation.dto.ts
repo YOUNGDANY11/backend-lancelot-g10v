@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { EvaluationDimension } from '../entities/technical-evaluation.entity'
+import { Sport } from 'src/common/sport/sport-rules'
 import { Type } from 'class-transformer'
 import {
   IsDateString,
@@ -50,6 +51,11 @@ export class FilterTechnicalEvaluationDto {
   @IsEnum(EvaluationDimension)
   @ApiPropertyOptional({ enum: EvaluationDimension })
   dimension?: EvaluationDimension
+
+  @IsOptional()
+  @IsEnum(Sport)
+  @ApiPropertyOptional({ enum: Sport })
+  sport?: Sport
 
   @IsOptional()
   @IsDateString()

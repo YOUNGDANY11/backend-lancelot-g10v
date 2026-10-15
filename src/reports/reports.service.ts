@@ -90,7 +90,7 @@ export class ReportsService {
       physicalEvaluations,
       technicalEvaluations,
       developmentObjectives,
-      weightedProgressIndex,
+      weightedProgressIndices,
       talentFlags,
     ] = await Promise.all([
       this.physicalEvaluationsRepository.find({
@@ -105,7 +105,7 @@ export class ReportsService {
         where: { id_user, id_season },
         order: { target_date: 'ASC' },
       }),
-      this.weightedProgressIndexRepository.findOne({
+      this.weightedProgressIndexRepository.find({
         where: { id_user, id_season },
         relations: { athlete: true },
       }),
@@ -146,91 +146,45 @@ export class ReportsService {
       .orderBy('assessment.assessment_date', 'ASC')
       .getMany()
 
-    let trainingParticipation = {
-      total_sessions: 0,
-      sessions_attended: 0,
-      attendance_rate: 0,
-      avg_rpe: 0,
-      total_session_load: 0,
+    const sportOf = (assignment: AthletesInCategory) =>
+      assignment.category?.sport ?? Sport.FUTBOL
+    const sports = [...new Set(assignments.map(sportOf))]
+    const overall = await this.participationFor(
+      id_user,
+      id_season,
+      categoryIds,
+      sports.length === 1 ? sports[0] : null,
+    )
+    const toIndexDto = (sport: Sport) => {
+      const index = weightedProgressIndices.find((item) => item.sport === sport)
+      return index
+        ? plainToInstance(ResponseWeightedProgressIndexDto, index, {
+            excludeExtraneousValues: true,
+          })
+        : null
     }
-    const sport = athInCat?.category?.sport ?? Sport.FUTBOL
-    let matchParticipation = {
-      match_minutes: sportRules(sport).matchMinutes,
-      matches_in_season: 0,
-      matches_played: 0,
-      total_minutes: 0,
-      goals: 0,
-      assists: 0,
-      yellow_cards: 0,
-      red_cards: 0,
-      fouls_committed: 0,
-    }
-
-    if (athInCat) {
-      const totalSessions = await this.trainingSessionsRepository.count({
-        where: { id_category: In(categoryIds), id_season },
-      })
-      const loads = await this.trainingLoadsRepository
-        .createQueryBuilder('load')
-        .innerJoin('load.session', 'session')
-        .where('load.id_user = :id_user', { id_user })
-        .andWhere('session.id_category IN (:...categoryIds)', { categoryIds })
-        .andWhere('session.id_season = :id_season', { id_season })
-        .getMany()
-      const sessionsAttended = new Set(loads.map((l) => l.id_session)).size
-      const avgRpe =
-        loads.length > 0
-          ? Math.round(
-              (loads.reduce((sum, l) => sum + l.rpe, 0) / loads.length) * 10,
-            ) / 10
-          : 0
-      const totalSessionLoad = loads.reduce((sum, l) => sum + l.session_load, 0)
-
-      trainingParticipation = {
-        total_sessions: totalSessions,
-        sessions_attended: sessionsAttended,
-        attendance_rate:
-          totalSessions > 0
-            ? Math.round((sessionsAttended / totalSessions) * 10000) / 100
-            : 0,
-        avg_rpe: avgRpe,
-        total_session_load: totalSessionLoad,
-      }
-
-      const seasonMatches = await this.matchesRepository
-        .createQueryBuilder('match')
-        .innerJoin('match.competency', 'competency')
-        .where('match.id_category IN (:...categoryIds)', { categoryIds })
-        .andWhere('competency.id_season = :id_season', { id_season })
-        .getMany()
-
-      if (seasonMatches.length > 0) {
-        const matchIds = seasonMatches.map((m) => m.id_match)
-        const relevantStats = await this.matchStatisticsRepository.find({
-          where: { id_user, id_match: In(matchIds) },
-        })
-        matchParticipation = {
-          match_minutes: sportRules(sport).matchMinutes,
-          matches_in_season: seasonMatches.length,
-          matches_played: relevantStats.length,
-          total_minutes: relevantStats.reduce(
-            (sum, s) => sum + s.minutes_played,
-            0,
-          ),
-          goals: relevantStats.reduce((sum, s) => sum + s.goals, 0),
-          assists: relevantStats.reduce((sum, s) => sum + s.assists, 0),
-          yellow_cards: relevantStats.reduce(
-            (sum, s) => sum + s.yellow_cards,
-            0,
-          ),
-          red_cards: relevantStats.reduce((sum, s) => sum + s.red_cards, 0),
-          fouls_committed: relevantStats.reduce(
-            (sum, s) => sum + s.fouls_committed,
-            0,
-          ),
+    const bySport = await Promise.all(
+      sports.map(async (sport) => {
+        const ofSport = assignments.filter(
+          (assignment) => sportOf(assignment) === sport,
+        )
+        const participation = await this.participationFor(
+          id_user,
+          id_season,
+          ofSport.map((assignment) => assignment.id_category),
+          sport,
+        )
+        return {
+          sport,
+          category: ofSport[0].category?.name ?? null,
+          position:
+            ofSport.find((assignment) => assignment.position)?.position ?? null,
+          training_participation: participation.training,
+          match_participation: participation.match,
+          weighted_progress_index: toIndexDto(sport),
         }
-      }
-    }
+      }),
+    )
 
     return {
       status: 'Success',
@@ -242,11 +196,13 @@ export class ReportsService {
           lastname: athlete.lastname,
           position: athInCat?.position ?? null,
           category: athInCat?.category?.name ?? null,
-          sport,
+          sport: athInCat ? sportOf(athInCat) : null,
+          sports,
           categories: assignments.map((assignment) => ({
             id_category: assignment.id_category,
             name: assignment.category?.name ?? null,
             position: assignment.position ?? null,
+            sport: sportOf(assignment),
           })),
         },
         season: {
@@ -277,15 +233,98 @@ export class ReportsService {
         talent_flags: plainToInstance(ResponseTalentFlagDto, talentFlags, {
           excludeExtraneousValues: true,
         }),
-        training_participation: trainingParticipation,
-        match_participation: matchParticipation,
-        weighted_progress_index: weightedProgressIndex
-          ? plainToInstance(
-              ResponseWeightedProgressIndexDto,
-              weightedProgressIndex,
-              { excludeExtraneousValues: true },
-            )
+        training_participation: overall.training,
+        match_participation: overall.match,
+        weighted_progress_index: athInCat
+          ? toIndexDto(sportOf(athInCat))
           : null,
+        by_sport: bySport,
+      },
+    }
+  }
+
+  private async participationFor(
+    id_user: number,
+    id_season: number,
+    categoryIds: number[],
+    sport: Sport | null,
+  ) {
+    const training = {
+      total_sessions: 0,
+      sessions_attended: 0,
+      attendance_rate: 0,
+      avg_rpe: 0,
+      total_session_load: 0,
+    }
+    const match = {
+      match_minutes: sport ? sportRules(sport).matchMinutes : null,
+      matches_in_season: 0,
+      matches_played: 0,
+      total_minutes: 0,
+      goals: 0,
+      assists: 0,
+      yellow_cards: 0,
+      red_cards: 0,
+      fouls_committed: 0,
+    }
+    if (categoryIds.length === 0) return { training, match }
+
+    const totalSessions = await this.trainingSessionsRepository.count({
+      where: { id_category: In(categoryIds), id_season },
+    })
+    const loads = await this.trainingLoadsRepository
+      .createQueryBuilder('load')
+      .innerJoin('load.session', 'session')
+      .where('load.id_user = :id_user', { id_user })
+      .andWhere('session.id_category IN (:...categoryIds)', { categoryIds })
+      .andWhere('session.id_season = :id_season', { id_season })
+      .getMany()
+    const sessionsAttended = new Set(loads.map((l) => l.id_session)).size
+    training.total_sessions = totalSessions
+    training.sessions_attended = sessionsAttended
+    training.attendance_rate =
+      totalSessions > 0
+        ? Math.round((sessionsAttended / totalSessions) * 10000) / 100
+        : 0
+    training.avg_rpe =
+      loads.length > 0
+        ? Math.round(
+            (loads.reduce((sum, l) => sum + l.rpe, 0) / loads.length) * 10,
+          ) / 10
+        : 0
+    training.total_session_load = loads.reduce(
+      (sum, l) => sum + l.session_load,
+      0,
+    )
+
+    const seasonMatches = await this.matchesRepository
+      .createQueryBuilder('match')
+      .innerJoin('match.competency', 'competency')
+      .where('match.id_category IN (:...categoryIds)', { categoryIds })
+      .andWhere('competency.id_season = :id_season', { id_season })
+      .getMany()
+    if (seasonMatches.length === 0) return { training, match }
+
+    const stats = await this.matchStatisticsRepository.find({
+      where: {
+        id_user,
+        id_match: In(seasonMatches.map((item) => item.id_match)),
+      },
+    })
+    const total = (pick: (stat: (typeof stats)[number]) => number) =>
+      stats.reduce((sum, stat) => sum + pick(stat), 0)
+    return {
+      training,
+      match: {
+        ...match,
+        matches_in_season: seasonMatches.length,
+        matches_played: stats.length,
+        total_minutes: total((stat) => stat.minutes_played),
+        goals: total((stat) => stat.goals),
+        assists: total((stat) => stat.assists),
+        yellow_cards: total((stat) => stat.yellow_cards),
+        red_cards: total((stat) => stat.red_cards),
+        fouls_committed: total((stat) => stat.fouls_committed),
       },
     }
   }
@@ -303,6 +342,7 @@ export class ReportsService {
       .leftJoinAndSelect('index.season', 'season')
       .where('index.id_user = :id_user', { id_user })
       .orderBy('season.start_date', 'ASC')
+      .addOrderBy('index.sport', 'ASC')
       .getMany()
 
     if (indices.length === 0)
@@ -325,6 +365,7 @@ export class ReportsService {
         season_name: index.season.name,
         start_date: index.season.start_date,
         end_date: index.season.end_date,
+        sport: index.sport,
         physical_score: index.physical_score,
         technical_score: index.technical_score,
         participation_score: index.participation_score,

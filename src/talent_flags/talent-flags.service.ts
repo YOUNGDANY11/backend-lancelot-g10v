@@ -13,6 +13,10 @@ import { FilterTalentFlagDto } from './dto/filter-talent-flag.dto'
 import { ResponseTalentFlagDto } from './dto/response-talent-flag.dto'
 import { UpdateTalentFlagDto } from './dto/update-talent-flag.dto'
 import { TalentFlag, TalentFlagSource } from './entities/talent-flag.entity'
+import {
+  resolveAthleteSport,
+  sportsOfAthleteSeason,
+} from 'src/common/sport/athlete-sports'
 
 @Injectable()
 export class TalentFlagsService {
@@ -58,7 +62,15 @@ export class TalentFlagsService {
   }
 
   async findAll(filters: FilterTalentFlagDto) {
-    const { page = 1, limit = 10, id_user, id_season, status, source } = filters
+    const {
+      page = 1,
+      limit = 10,
+      id_user,
+      id_season,
+      status,
+      source,
+      sport,
+    } = filters
     const query = this.talentFlagsRepository
       .createQueryBuilder('flag')
       .leftJoinAndSelect('flag.athlete', 'athlete')
@@ -70,6 +82,7 @@ export class TalentFlagsService {
     if (id_season) query.andWhere('flag.id_season = :id_season', { id_season })
     if (status) query.andWhere('flag.status = :status', { status })
     if (source) query.andWhere('flag.source = :source', { source })
+    if (sport) query.andWhere('flag.sport = :sport', { sport })
 
     const [flags, total] = await query.getManyAndCount()
     if (!total)
@@ -109,8 +122,17 @@ export class TalentFlagsService {
       createTalentFlagDto.id_season,
       createTalentFlagDto.created_by,
     )
+    const sport = resolveAthleteSport(
+      await sportsOfAthleteSeason(
+        this.talentFlagsRepository.manager,
+        createTalentFlagDto.id_user,
+        createTalentFlagDto.id_season,
+      ),
+      createTalentFlagDto.sport,
+    )
     const flag = await this.talentFlagsRepository.save({
       ...createTalentFlagDto,
+      sport,
       source: TalentFlagSource.MANUAL,
     })
     return this.getById(flag.id_flag)

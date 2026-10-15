@@ -1,3 +1,4 @@
+import { Sport } from 'src/common/sport/sport-rules'
 import { PositionWeightProfile } from 'src/position_weight_profiles/entities/position-weight-profile.entity'
 import { Season } from 'src/seasons/entities/season.entity'
 import { User } from 'src/users/entities/user.entity'
@@ -12,9 +13,13 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
-@Index('UQ_weighted_progress_index_user_season', ['id_user', 'id_season'], {
-  unique: true,
-})
+@Index(
+  'UQ_weighted_progress_index_user_season_sport',
+  ['id_user', 'id_season', 'sport'],
+  {
+    unique: true,
+  },
+)
 @Entity('weighted_progress_indices')
 export class WeightedProgressIndex {
   @PrimaryGeneratedColumn()
@@ -25,6 +30,9 @@ export class WeightedProgressIndex {
 
   @Column()
   id_season: number
+
+  @Column({ type: 'enum', enum: Sport, default: Sport.FUTBOL })
+  sport: Sport
 
   @Column({ type: 'int', nullable: true })
   id_profile: number | null

@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { plainToInstance } from 'class-transformer'
-import { Repository } from 'typeorm'
+import { IsNull, Repository } from 'typeorm'
 import { AthletesInCategory } from 'src/athletes_in_categories/entities/athletes_in_category.entity'
 import { Category } from 'src/categories/entities/category.entity'
 import { Match } from 'src/matches/entities/match.entity'
@@ -21,7 +21,7 @@ import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
 import { TrainingSession } from 'src/training_sessions/entities/training-session.entity'
 import { UsersService } from 'src/users/users.service'
 import { extractErrorMessage } from 'src/common/utils/error-message.util'
-import { sportRules } from 'src/common/sport/sport-rules'
+import { Sport, sportRules } from 'src/common/sport/sport-rules'
 import { FilterWeightedProgressIndexDto } from './dto/filter-weighted-progress-index.dto'
 import { ResponseWeightedProgressIndexDto } from './dto/response-weighted-progress-index.dto'
 import { WeightedProgressIndex } from './entities/weighted-progress-index.entity'
@@ -62,7 +62,7 @@ export class WeightedProgressIndexService {
   }
 
   async findAll(filters: FilterWeightedProgressIndexDto) {
-    const { page = 1, limit = 10, id_user, id_season } = filters
+    const { page = 1, limit = 10, id_user, id_season, sport } = filters
     const query = this.weightedProgressIndexRepository
       .createQueryBuilder('index')
       .leftJoinAndSelect('index.athlete', 'athlete')
@@ -73,6 +73,7 @@ export class WeightedProgressIndexService {
 
     if (id_user) query.andWhere('index.id_user = :id_user', { id_user })
     if (id_season) query.andWhere('index.id_season = :id_season', { id_season })
+    if (sport) query.andWhere('index.sport = :sport', { sport })
 
     const [indices, total] = await query.getManyAndCount()
     if (!total)
@@ -129,18 +130,25 @@ export class WeightedProgressIndexService {
 
     const assignments = await this.athletesInCategoryRepository.find({
       where: { id_season },
-      select: { id_user: true },
+      relations: { category: true },
     })
-    const userIds = [...new Set(assignments.map((a) => a.id_user))]
+    const pairs = new Map<string, { id_user: number; sport: Sport }>()
+    for (const assignment of assignments) {
+      const sport = assignment.category?.sport ?? Sport.FUTBOL
+      pairs.set(`${assignment.id_user}|${sport}`, {
+        id_user: assignment.id_user,
+        sport,
+      })
+    }
 
     let recalculated = 0
-    const failed: { id_user: number; mensaje: string }[] = []
-    for (const id_user of userIds) {
+    const failed: { id_user: number; sport: Sport; mensaje: string }[] = []
+    for (const { id_user, sport } of pairs.values()) {
       try {
-        await this.calculateForAthleteSeason(id_user, id_season)
+        await this.calculateForAthleteSeason(id_user, id_season, sport)
         recalculated++
       } catch (error) {
-        failed.push({ id_user, mensaje: extractErrorMessage(error) })
+        failed.push({ id_user, sport, mensaje: extractErrorMessage(error) })
       }
     }
 
@@ -152,7 +160,11 @@ export class WeightedProgressIndexService {
     }
   }
 
-  async calculateForAthleteSeason(id_user: number, id_season: number) {
+  async calculateForAthleteSeason(
+    id_user: number,
+    id_season: number,
+    sport?: Sport,
+  ) {
     const athlete = await this.usersService.findOneById(id_user)
     if (!athlete)
       throw new BadRequestException({
@@ -169,12 +181,69 @@ export class WeightedProgressIndexService {
 
     const seasonAssignments = await this.athletesInCategoryRepository
       .createQueryBuilder('assignment')
-      .leftJoin('assignment.category', 'category')
+      .leftJoinAndSelect('assignment.category', 'category')
       .where('assignment.id_user = :id_user', { id_user })
       .andWhere('assignment.id_season = :id_season', { id_season })
       .orderBy('category.max_age', 'ASC')
       .addOrderBy('assignment.id_ath_cat', 'ASC')
       .getMany()
+    if (seasonAssignments.length === 0)
+      throw new BadRequestException({
+        status: 'Error',
+        mensaje:
+          'El deportista no está asignado a una categoría en esta temporada',
+      })
+
+    const sportOf = (assignment: AthletesInCategory) =>
+      assignment.category?.sport ?? Sport.FUTBOL
+    const sports = [...new Set(seasonAssignments.map(sportOf))]
+    if (sport && !sports.includes(sport))
+      throw new BadRequestException({
+        status: 'Error',
+        mensaje: `El deportista no juega ${sportRules(sport).label} en esta temporada`,
+      })
+    const targets = sport ? [sport] : sports
+
+    const savedIds: number[] = []
+    for (const target of targets) {
+      try {
+        savedIds.push(
+          await this.calculateForSport(
+            id_user,
+            id_season,
+            target,
+            seasonAssignments.filter(
+              (assignment) => sportOf(assignment) === target,
+            ),
+          ),
+        )
+      } catch (error) {
+        if (targets.length === 1) throw error
+        throw new BadRequestException({
+          status: 'Error',
+          mensaje: `${sportRules(target).label}: ${extractErrorMessage(error)}`,
+        })
+      }
+    }
+
+    const results = await Promise.all(savedIds.map((id) => this.getById(id)))
+    return {
+      status: 'Success',
+      mensaje:
+        results.length === 1
+          ? 'Índice de progreso ponderado calculado con éxito'
+          : `Índices de progreso calculados para ${results.length} deportes`,
+      index: results[0].index,
+      indices: results.map((result) => result.index),
+    }
+  }
+
+  private async calculateForSport(
+    id_user: number,
+    id_season: number,
+    sport: Sport,
+    seasonAssignments: AthletesInCategory[],
+  ): Promise<number> {
     const baseAssignment = seasonAssignments[0]
     const athInCat = baseAssignment
       ? {
@@ -249,7 +318,10 @@ export class WeightedProgressIndexService {
     // --- Technical score: average of the season's evaluations, scaled to 0-100 ---
     const technicalEvaluations = await this.technicalEvaluationsRepository.find(
       {
-        where: { id_user, id_season },
+        where: [
+          { id_user, id_season, sport },
+          { id_user, id_season, sport: IsNull() },
+        ],
       },
     )
     const scoresOf = (dimension: EvaluationDimension) =>
@@ -326,12 +398,13 @@ export class WeightedProgressIndexService {
     ]
 
     const existing = await this.weightedProgressIndexRepository.findOne({
-      where: { id_user, id_season },
+      where: { id_user, id_season, sport },
     })
     const saved = await this.weightedProgressIndexRepository.save({
       ...(existing ?? {}),
       id_user,
       id_season,
+      sport,
       id_profile: profile.id_profile,
       physical_score: physical.score,
       technical_score: technical.score,
@@ -340,6 +413,6 @@ export class WeightedProgressIndexService {
       warnings: warnings.length > 0 ? warnings : null,
     })
 
-    return this.getById(saved.id_index)
+    return saved.id_index
   }
 }

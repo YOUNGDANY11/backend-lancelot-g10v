@@ -73,6 +73,7 @@ export class WeightedProgressIndexController {
     return this.weightedProgressIndexService.calculateForAthleteSeason(
       id_user,
       recalculateDto.id_season,
+      recalculateDto.sport,
     )
   }
 }

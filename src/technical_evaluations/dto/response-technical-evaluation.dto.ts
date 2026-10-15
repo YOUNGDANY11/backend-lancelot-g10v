@@ -1,3 +1,4 @@
+import { Sport } from 'src/common/sport/sport-rules'
 import { EvaluationDimension } from '../entities/technical-evaluation.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
@@ -37,6 +38,10 @@ export class ResponseTechnicalEvaluationDto {
     example: EvaluationDimension.TECNICA,
   })
   dimension: EvaluationDimension
+
+  @Expose()
+  @ApiProperty({ enum: Sport, nullable: true, example: Sport.FUTBOL })
+  sport: Sport | null
 
   @Expose()
   @ApiProperty({ example: 8.5, minimum: 1, maximum: 10 })

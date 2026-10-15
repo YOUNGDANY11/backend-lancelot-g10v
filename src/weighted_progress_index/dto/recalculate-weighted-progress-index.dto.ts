@@ -1,6 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsInt, IsNotEmpty, Min } from 'class-validator'
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, Min } from 'class-validator'
+import { Sport } from 'src/common/sport/sport-rules'
 
 export class RecalculateWeightedProgressIndexDto {
   @Type(() => Number)
@@ -12,4 +13,13 @@ export class RecalculateWeightedProgressIndexDto {
     example: 1,
   })
   id_season: number
+
+  @IsOptional()
+  @IsEnum(Sport)
+  @ApiPropertyOptional({
+    enum: Sport,
+    description:
+      'Deporte a recalcular. Si se omite, se calcula un índice por cada deporte que el deportista juega en la temporada.',
+  })
+  sport?: Sport
 }

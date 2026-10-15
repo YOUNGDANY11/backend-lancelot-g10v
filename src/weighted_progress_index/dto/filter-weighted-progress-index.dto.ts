@@ -1,6 +1,7 @@
+import { Sport } from 'src/common/sport/sport-rules'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsInt, IsOptional, Max, Min } from 'class-validator'
+import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator'
 
 export class FilterWeightedProgressIndexDto {
   @IsOptional()
@@ -31,4 +32,9 @@ export class FilterWeightedProgressIndexDto {
   @Min(1)
   @ApiPropertyOptional({ example: 1 })
   id_season?: number
+
+  @IsOptional()
+  @IsEnum(Sport)
+  @ApiPropertyOptional({ enum: Sport })
+  sport?: Sport
 }

@@ -1,3 +1,4 @@
+import { Sport } from 'src/common/sport/sport-rules'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import {
@@ -24,6 +25,10 @@ export class ResponseTalentFlagDto {
   @Expose()
   @ApiProperty({ example: 1 })
   id_season: number
+
+  @Expose()
+  @ApiProperty({ enum: Sport, nullable: true, example: Sport.FUTBOL })
+  sport?: Sport | null
 
   @Expose()
   @ApiProperty({

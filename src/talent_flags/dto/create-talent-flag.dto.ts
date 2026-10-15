@@ -1,6 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { Sport } from 'src/common/sport/sport-rules'
 import { Type } from 'class-transformer'
-import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator'
+import {
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator'
 
 export class CreateTalentFlagDto {
   @Type(() => Number)
@@ -14,6 +22,15 @@ export class CreateTalentFlagDto {
   @Min(1)
   @ApiProperty({ description: 'Id de la temporada de referencia.', example: 1 })
   id_season: number
+
+  @IsOptional()
+  @IsEnum(Sport, { message: 'El deporte debe ser futbol o futbol_sala' })
+  @ApiPropertyOptional({
+    enum: Sport,
+    description:
+      'Deporte en el que se señala el potencial. Es obligatorio si el deportista juega fútbol y fútbol sala en la temporada.',
+  })
+  sport?: Sport
 
   @IsString()
   @IsNotEmpty()

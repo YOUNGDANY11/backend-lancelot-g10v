@@ -1,4 +1,5 @@
 import { Season } from 'src/seasons/entities/season.entity'
+import { Sport } from 'src/common/sport/sport-rules'
 import { User } from 'src/users/entities/user.entity'
 import {
   Column,
@@ -32,6 +33,9 @@ export class TechnicalEvaluation {
     default: EvaluationDimension.TECNICA,
   })
   dimension: EvaluationDimension
+
+  @Column({ type: 'enum', enum: Sport, nullable: true })
+  sport: Sport | null
 
   @Column({ length: 60 })
   indicator: string

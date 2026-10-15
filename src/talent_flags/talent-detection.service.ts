@@ -18,6 +18,7 @@ import {
   TalentFlagStatus,
 } from './entities/talent-flag.entity'
 import { TalentDetectionRulesService } from './talent-detection-rules.service'
+import { Sport } from 'src/common/sport/sport-rules'
 
 @Injectable()
 export class TalentDetectionService {
@@ -72,13 +73,18 @@ export class TalentDetectionService {
         }),
       ])
 
-    const previousIndexByUser = new Map<number, number>()
+    const keyOf = (id_user: number, sport: Sport | null | undefined) =>
+      `${id_user}|${sport ?? Sport.FUTBOL}`
+    const previousIndexByKey = new Map<string, number>()
     if (previousSeason) {
       const previousIndices = await this.weightedProgressIndexRepository.find({
         where: { id_season: previousSeason.id_season },
       })
       for (const index of previousIndices)
-        previousIndexByUser.set(index.id_user, Number(index.index_value))
+        previousIndexByKey.set(
+          keyOf(index.id_user, index.sport),
+          Number(index.index_value),
+        )
     }
 
     const severeInjuries: { id_user: number }[] = await this.injuriesRepository
@@ -94,23 +100,31 @@ export class TalentDetectionService {
       severeInjuries.map((row) => Number(row.id_user)),
     )
 
-    const existingFlagByUser = new Map(existingFlags.map((f) => [f.id_user, f]))
+    const existingFlagByKey = new Map(
+      existingFlags.map((flag) => [keyOf(flag.id_user, flag.sport), flag]),
+    )
     const categoryInfos = categories.map((c) => ({
       id_category: c.id_category,
       name: c.name,
       min_age: Number(c.min_age),
       max_age: Number(c.max_age),
+      sport: c.sport ?? Sport.FUTBOL,
     }))
     const categoryById = new Map(categoryInfos.map((c) => [c.id_category, c]))
-    const assignmentByUser = pickBaseAssignments(
+    const assignmentByKey = pickBaseAssignments(
       assignments,
       (assignment) =>
         categoryById.get(assignment.id_category)?.max_age ?? Infinity,
+      (assignment) =>
+        keyOf(
+          assignment.id_user,
+          categoryById.get(assignment.id_category)?.sport,
+        ),
     )
 
     const cohortValues = new Map<number, number[]>()
     for (const index of indices) {
-      const assignment = assignmentByUser.get(index.id_user)
+      const assignment = assignmentByKey.get(keyOf(index.id_user, index.sport))
       if (!assignment) continue
       const values = cohortValues.get(assignment.id_category) ?? []
       values.push(Number(index.index_value))
@@ -130,7 +144,8 @@ export class TalentDetectionService {
     const failed: { id_user: number; mensaje: string }[] = []
 
     for (const index of indices) {
-      const assignment = assignmentByUser.get(index.id_user)
+      const key = keyOf(index.id_user, index.sport)
+      const assignment = assignmentByKey.get(key)
       const category = assignment
         ? categoryById.get(assignment.id_category)
         : undefined
@@ -152,17 +167,19 @@ export class TalentDetectionService {
           physical_score: Number(index.physical_score),
           technical_score: Number(index.technical_score),
           participation_score: Number(index.participation_score),
-          previous_index_value: previousIndexByUser.get(index.id_user) ?? null,
+          previous_index_value: previousIndexByKey.get(key) ?? null,
           had_severe_injury: severeInjuryUsers.has(index.id_user),
           birth_date: assignment.user?.birth_date ?? null,
           reference_date: referenceDate,
           category,
-          categories: categoryInfos,
+          categories: categoryInfos.filter(
+            (candidate) => candidate.sport === category.sport,
+          ),
           thresholds: this.talentRuleConfigService.toThresholds(config),
         })
         evaluated++
 
-        const existing = existingFlagByUser.get(index.id_user)
+        const existing = existingFlagByKey.get(key)
         if (result.flagged) {
           flagged++
           if (existing && existing.status !== TalentFlagStatus.OPEN) {
@@ -173,6 +190,7 @@ export class TalentDetectionService {
             ...(existing ?? {}),
             id_user: index.id_user,
             id_season,
+            sport: index.sport,
             source: TalentFlagSource.RULES,
             status: TalentFlagStatus.OPEN,
             criteria: result.criteria_text,
