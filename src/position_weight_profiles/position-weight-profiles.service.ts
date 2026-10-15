@@ -12,6 +12,8 @@ import { ResponsePositionWeightProfileDto } from './dto/response-position-weight
 import { UpdatePositionWeightProfileDto } from './dto/update-position-weight-profile.dto'
 import { PositionWeightProfile } from './entities/position-weight-profile.entity'
 
+import { positionErrorFor, Sport } from 'src/common/sport/sport-rules'
+
 const WEIGHT_SUM_TOLERANCE = 0.01
 
 @Injectable()
@@ -21,12 +23,28 @@ export class PositionWeightProfilesService {
     private readonly positionWeightProfilesRepository: Repository<PositionWeightProfile>,
   ) {}
 
+  private async assertFitsCategory(age_category: string, position: string) {
+    const rows: { sport: Sport }[] =
+      await this.positionWeightProfilesRepository.manager.query(
+        'SELECT sport FROM categories WHERE name = $1 LIMIT 1',
+        [age_category],
+      )
+    if (rows.length === 0)
+      throw new BadRequestException({
+        status: 'Error',
+        mensaje: `No existe una categoría llamada "${age_category}". El índice de progreso empareja el perfil con el nombre exacto de la categoría.`,
+      })
+    const mensaje = positionErrorFor(rows[0].sport, position)
+    if (mensaje) throw new BadRequestException({ status: 'Error', mensaje })
+  }
+
   private validateWeightsSumToOne(
     w_physical: number,
     w_technical: number,
     w_participation: number,
   ) {
-    const sum = Number(w_physical) + Number(w_technical) + Number(w_participation)
+    const sum =
+      Number(w_physical) + Number(w_technical) + Number(w_participation)
     if (Math.abs(sum - 1) > WEIGHT_SUM_TOLERANCE)
       throw new BadRequestException({
         status: 'Error',
@@ -102,6 +120,10 @@ export class PositionWeightProfilesService {
       createPositionWeightProfileDto.w_technical,
       createPositionWeightProfileDto.w_participation,
     )
+    await this.assertFitsCategory(
+      createPositionWeightProfileDto.age_category,
+      createPositionWeightProfileDto.position,
+    )
     const existing = await this.findByPositionAndAgeCategory(
       createPositionWeightProfileDto.position,
       createPositionWeightProfileDto.age_category,
@@ -142,6 +164,11 @@ export class PositionWeightProfilesService {
       updated.w_technical,
       updated.w_participation,
     )
+    if (
+      updatePositionWeightProfileDto.position !== undefined ||
+      updatePositionWeightProfileDto.age_category !== undefined
+    )
+      await this.assertFitsCategory(updated.age_category, updated.position)
     await this.positionWeightProfilesRepository.save(updated)
     return {
       status: 'Success',

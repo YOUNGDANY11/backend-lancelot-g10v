@@ -42,6 +42,10 @@ export class ResponseMatchStatisticDto {
   red_cards: number
 
   @Expose()
+  @ApiProperty({ example: 2 })
+  fouls_committed: number
+
+  @Expose()
   @ApiPropertyOptional({ example: 7, nullable: true })
   rpe?: number | null
 

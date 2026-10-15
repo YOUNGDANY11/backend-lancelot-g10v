@@ -66,6 +66,7 @@ export class TechnicalEvaluationsService {
       id_user,
       id_season,
       indicator,
+      dimension,
       eval_date,
     } = filters
     const query = this.technicalEvaluationsRepository
@@ -85,6 +86,8 @@ export class TechnicalEvaluationsService {
       query.andWhere('evaluation.indicator ILIKE :indicator', {
         indicator: `%${indicator}%`,
       })
+    if (dimension)
+      query.andWhere('evaluation.dimension = :dimension', { dimension })
     if (eval_date)
       query.andWhere('evaluation.eval_date = :eval_date', { eval_date })
 

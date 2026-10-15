@@ -71,14 +71,36 @@ export class ProgressIndexCalculatorService {
     return { score: this.round2(score), warnings: [] }
   }
 
-  computeTechnicalScore(scores: number[]): ScoreResult {
-    if (scores.length === 0)
+  computeTechnicalScore({
+    technical,
+    tactical,
+  }: {
+    technical: number[]
+    tactical: number[]
+  }): ScoreResult {
+    const average = (scores: number[]) =>
+      scores.reduce((sum, s) => sum + s, 0) / scores.length
+    const dimensions = [technical, tactical].filter((scores) => scores.length)
+    if (dimensions.length === 0)
       return {
         score: 0,
-        warnings: ['Sin evaluaciones técnicas registradas en la temporada'],
+        warnings: [
+          'Sin evaluaciones técnicas ni tácticas registradas en la temporada',
+        ],
       }
-    const avg = scores.reduce((sum, s) => sum + s, 0) / scores.length
-    return { score: this.round2(this.clamp(avg * 10, 0, 100)), warnings: [] }
+    const avg =
+      dimensions.reduce((sum, scores) => sum + average(scores), 0) /
+      dimensions.length
+    const warnings: string[] = []
+    if (technical.length === 0)
+      warnings.push(
+        'Sin evaluaciones técnicas en la temporada: el puntaje usa solo la dimensión táctica',
+      )
+    if (tactical.length === 0)
+      warnings.push(
+        'Sin evaluaciones tácticas en la temporada: el puntaje usa solo la dimensión técnica',
+      )
+    return { score: this.round2(this.clamp(avg * 10, 0, 100)), warnings }
   }
 
   computeParticipationScore(
@@ -91,7 +113,9 @@ export class ProgressIndexCalculatorService {
     if (ratios.length === 0)
       return {
         score: 0,
-        warnings: ['Sin datos de participación (entrenamientos o partidos) en la temporada'],
+        warnings: [
+          'Sin datos de participación (entrenamientos o partidos) en la temporada',
+        ],
       }
     const avgRatio = ratios.reduce((sum, r) => sum + r, 0) / ratios.length
     return {

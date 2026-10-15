@@ -1,7 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
+import { EvaluationDimension } from '../entities/technical-evaluation.entity'
 import { Type } from 'class-transformer'
 import {
   IsDateString,
+  IsEnum,
   IsInt,
   IsOptional,
   IsString,
@@ -43,6 +45,11 @@ export class FilterTechnicalEvaluationDto {
   @IsString()
   @ApiPropertyOptional({ example: 'pase' })
   indicator?: string
+
+  @IsOptional()
+  @IsEnum(EvaluationDimension)
+  @ApiPropertyOptional({ enum: EvaluationDimension })
+  dimension?: EvaluationDimension
 
   @IsOptional()
   @IsDateString()

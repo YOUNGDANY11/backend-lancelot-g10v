@@ -64,20 +64,40 @@ describe('ProgressIndexCalculatorService', () => {
   })
 
   describe('computeTechnicalScore', () => {
-    it('averages the 0-10 scores and scales them to 0-100', () => {
-      const result = service.computeTechnicalScore([8, 7, 9])
-      expect(result.score).toBe(80)
+    it('averages the technical and the tactical dimension and scales them to 0-100', () => {
+      const result = service.computeTechnicalScore({
+        technical: [8, 7, 9],
+        tactical: [6],
+      })
+      expect(result.score).toBe(70)
       expect(result.warnings).toEqual([])
     })
 
-    it('returns 0 with a warning when there are no technical evaluations', () => {
-      const result = service.computeTechnicalScore([])
+    it('uses the available dimension and warns about the missing one', () => {
+      const result = service.computeTechnicalScore({
+        technical: [8, 7, 9],
+        tactical: [],
+      })
+      expect(result.score).toBe(80)
+      expect(result.warnings).toEqual([
+        'Sin evaluaciones tácticas en la temporada: el puntaje usa solo la dimensión técnica',
+      ])
+    })
+
+    it('returns 0 with a warning when there are no evaluations', () => {
+      const result = service.computeTechnicalScore({
+        technical: [],
+        tactical: [],
+      })
       expect(result.score).toBe(0)
       expect(result.warnings).toHaveLength(1)
     })
 
     it('clamps an out-of-range average to 100', () => {
-      const result = service.computeTechnicalScore([10, 10, 10])
+      const result = service.computeTechnicalScore({
+        technical: [10, 10],
+        tactical: [10],
+      })
       expect(result.score).toBe(100)
     })
   })

@@ -13,6 +13,7 @@ import { FilterMatchStatisticDto } from './dto/filter-match-statistic.dto'
 import { ResponseMatchStatisticDto } from './dto/response-match-statistic.dto'
 import { UpdateMatchStatisticDto } from './dto/update-match-statistic.dto'
 import { MatchStatistic } from './entities/match-statistic.entity'
+import { minutesErrorFor } from 'src/common/sport/sport-rules'
 
 @Injectable()
 export class MatchStatisticsService {
@@ -23,7 +24,11 @@ export class MatchStatisticsService {
     private readonly matchesService: MatchesService,
   ) {}
 
-  private async validateReferences(id_match: number, id_user: number) {
+  private async validateReferences(
+    id_match: number,
+    id_user: number,
+    minutes_played: number,
+  ) {
     const [match, athlete] = await Promise.all([
       this.matchesService.findOneById(id_match),
       this.usersService.findOneById(id_user),
@@ -38,6 +43,8 @@ export class MatchStatisticsService {
         status: 'Error',
         mensaje: 'No existe el deportista indicado',
       })
+    const mensaje = minutesErrorFor(match.category?.sport, minutes_played)
+    if (mensaje) throw new BadRequestException({ status: 'Error', mensaje })
   }
 
   async findOneById(id_match_stat: number) {
@@ -96,6 +103,7 @@ export class MatchStatisticsService {
     await this.validateReferences(
       createMatchStatisticDto.id_match,
       createMatchStatisticDto.id_user,
+      createMatchStatisticDto.minutes_played,
     )
     const stat = await this.matchStatisticsRepository.save(
       createMatchStatisticDto,
@@ -117,7 +125,11 @@ export class MatchStatisticsService {
       stat,
       updateMatchStatisticDto,
     )
-    await this.validateReferences(updated.id_match, updated.id_user)
+    await this.validateReferences(
+      updated.id_match,
+      updated.id_user,
+      updated.minutes_played,
+    )
     await this.matchStatisticsRepository.save(updated)
     return this.getById(id_match_stat)
   }

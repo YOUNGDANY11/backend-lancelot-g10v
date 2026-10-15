@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger'
+import { Sport } from 'src/common/sport/sport-rules'
 
 export class ResponseCategoryDto {
   @ApiProperty({ example: 1 }) id_category: number
   @ApiProperty({ example: 'Sub-15' }) name: string
   @ApiProperty({ example: 13 }) min_age: number
   @ApiProperty({ example: 15 }) max_age: number
+  @ApiProperty({ enum: Sport, example: Sport.FUTBOL }) sport: Sport
   @ApiProperty({
     type: String,
     format: 'date-time',

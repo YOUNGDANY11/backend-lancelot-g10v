@@ -22,8 +22,7 @@ import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
 import { TrainingSession } from 'src/training_sessions/entities/training-session.entity'
 import { UsersService } from 'src/users/users.service'
 import { WeightedProgressIndex } from 'src/weighted_progress_index/entities/weighted-progress-index.entity'
-
-const STANDARD_MATCH_MINUTES = 90
+import { Sport, sportRules } from 'src/common/sport/sport-rules'
 
 @Injectable()
 export class ReportsService {
@@ -154,7 +153,9 @@ export class ReportsService {
       avg_rpe: 0,
       total_session_load: 0,
     }
+    const sport = athInCat?.category?.sport ?? Sport.FUTBOL
     let matchParticipation = {
+      match_minutes: sportRules(sport).matchMinutes,
       matches_in_season: 0,
       matches_played: 0,
       total_minutes: 0,
@@ -162,6 +163,7 @@ export class ReportsService {
       assists: 0,
       yellow_cards: 0,
       red_cards: 0,
+      fouls_committed: 0,
     }
 
     if (athInCat) {
@@ -208,6 +210,7 @@ export class ReportsService {
           where: { id_user, id_match: In(matchIds) },
         })
         matchParticipation = {
+          match_minutes: sportRules(sport).matchMinutes,
           matches_in_season: seasonMatches.length,
           matches_played: relevantStats.length,
           total_minutes: relevantStats.reduce(
@@ -221,6 +224,10 @@ export class ReportsService {
             0,
           ),
           red_cards: relevantStats.reduce((sum, s) => sum + s.red_cards, 0),
+          fouls_committed: relevantStats.reduce(
+            (sum, s) => sum + s.fouls_committed,
+            0,
+          ),
         }
       }
     }
@@ -235,6 +242,7 @@ export class ReportsService {
           lastname: athlete.lastname,
           position: athInCat?.position ?? null,
           category: athInCat?.category?.name ?? null,
+          sport,
           categories: assignments.map((assignment) => ({
             id_category: assignment.id_category,
             name: assignment.category?.name ?? null,

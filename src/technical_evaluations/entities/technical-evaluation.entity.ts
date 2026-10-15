@@ -10,6 +10,11 @@ import {
   UpdateDateColumn,
 } from 'typeorm'
 
+export enum EvaluationDimension {
+  TECNICA = 'tecnica',
+  TACTICA = 'tactica',
+}
+
 @Entity('technical_evaluations')
 export class TechnicalEvaluation {
   @PrimaryGeneratedColumn()
@@ -20,6 +25,13 @@ export class TechnicalEvaluation {
 
   @Column()
   id_season: number
+
+  @Column({
+    type: 'enum',
+    enum: EvaluationDimension,
+    default: EvaluationDimension.TECNICA,
+  })
+  dimension: EvaluationDimension
 
   @Column({ length: 60 })
   indicator: string

@@ -1,6 +1,7 @@
 import { AthletesInCategory } from 'src/athletes_in_categories/entities/athletes_in_category.entity'
 import { Competency } from 'src/competencies/entities/competency.entity'
 import { Match } from 'src/matches/entities/match.entity'
+import { Sport } from 'src/common/sport/sport-rules'
 import {
   Column,
   CreateDateColumn,
@@ -24,6 +25,9 @@ export class Category {
 
   @Column({ nullable: false })
   max_age: number
+
+  @Column({ type: 'enum', enum: Sport, default: Sport.FUTBOL })
+  sport: Sport
 
   @CreateDateColumn({ type: 'timestamptz' })
   created_at: Date

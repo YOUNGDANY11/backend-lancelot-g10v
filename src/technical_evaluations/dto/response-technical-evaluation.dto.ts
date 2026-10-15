@@ -1,3 +1,4 @@
+import { EvaluationDimension } from '../entities/technical-evaluation.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 
@@ -29,6 +30,13 @@ export class ResponseTechnicalEvaluationDto {
   @Expose()
   @ApiProperty({ example: 'control_balon' })
   indicator: string
+
+  @Expose()
+  @ApiProperty({
+    enum: EvaluationDimension,
+    example: EvaluationDimension.TECNICA,
+  })
+  dimension: EvaluationDimension
 
   @Expose()
   @ApiProperty({ example: 8.5, minimum: 1, maximum: 10 })

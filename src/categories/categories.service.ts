@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common'
+import { Sport, sportRules } from 'src/common/sport/sport-rules'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { UpdateCategoryDto } from './dto/update-category.dto'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -98,6 +103,20 @@ export class CategoriesService {
     }
   }
 
+  private async assertPositionsFitSport(id_category: number, sport: Sport) {
+    const rows: { position: string }[] =
+      await this.categoryRepository.manager.query(
+        `SELECT DISTINCT position FROM athletes_in_categories
+         WHERE id_category = $1 AND position IS NOT NULL AND NOT (position = ANY($2))`,
+        [id_category, sportRules(sport).positions],
+      )
+    if (rows.length > 0)
+      throw new ConflictException({
+        status: 'Error',
+        mensaje: `No se puede cambiar el deporte a ${sportRules(sport).label} porque hay deportistas con posiciones de otro deporte (${rows.map((row) => row.position).join(', ')}). Cambia primero sus posiciones.`,
+      })
+  }
+
   async update(id_category: number, updateCategoryDto: UpdateCategoryDto) {
     const existsCategory = await this.findOneById(id_category)
     if (!existsCategory)
@@ -105,6 +124,11 @@ export class CategoriesService {
         status: 'Error',
         mensaje: 'No existe esta categoria',
       })
+    if (
+      updateCategoryDto.sport &&
+      updateCategoryDto.sport !== existsCategory.sport
+    )
+      await this.assertPositionsFitSport(id_category, updateCategoryDto.sport)
     const category = await this.categoryRepository.merge(
       existsCategory,
       updateCategoryDto,

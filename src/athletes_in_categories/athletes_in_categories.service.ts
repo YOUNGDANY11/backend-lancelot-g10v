@@ -16,6 +16,7 @@ import { UsersService } from 'src/users/users.service'
 import { RolesService } from 'src/roles/roles.service'
 import { SeasonsService } from 'src/seasons/seasons.service'
 import { Category } from 'src/categories/entities/category.entity'
+import { positionErrorFor } from 'src/common/sport/sport-rules'
 import {
   checkCategoryEligibility,
   pickBaseAssignments,
@@ -310,6 +311,15 @@ export class AthletesInCategoriesService {
         status: 'Error',
         mensaje: eligibility.reason,
       })
+    return category
+  }
+
+  private assertPositionFitsSport(
+    category: Category,
+    position: string | null | undefined,
+  ) {
+    const mensaje = positionErrorFor(category.sport, position)
+    if (mensaje) throw new BadRequestException({ status: 'Error', mensaje })
   }
 
   async create(createAthletesInCategoryDto: CreateAthletesInCategoryDto) {
@@ -325,7 +335,12 @@ export class AthletesInCategoriesService {
         status: 'Error',
         mensaje: 'Este usuario no es un deportista',
       })
-    await this.assertEligible(existUser.birth_date, id_category, id_season)
+    const category = await this.assertEligible(
+      existUser.birth_date,
+      id_category,
+      id_season,
+    )
+    this.assertPositionFitsSport(category, createAthletesInCategoryDto.position)
     await this.assertNoDuplicateAssignment(id_user, id_category, id_season)
     const saved = await this.saveAssignment(createAthletesInCategoryDto)
     const athInCat = await this.findDetailed(saved.id_ath_cat)
@@ -382,7 +397,19 @@ export class AthletesInCategoriesService {
         status: 'Error',
         mensaje: 'Este usuario no es un deportista',
       })
-    await this.assertEligible(athlete.birth_date, id_category, id_season)
+    const category = await this.assertEligible(
+      athlete.birth_date,
+      id_category,
+      id_season,
+    )
+    if (
+      updateAthletesInCategoryDto.position !== undefined ||
+      id_category !== existsAthInCat.id_category
+    )
+      this.assertPositionFitsSport(
+        category,
+        updateAthletesInCategoryDto.position ?? existsAthInCat.position,
+      )
     await this.assertNoDuplicateAssignment(
       id_user,
       id_category,

@@ -13,17 +13,19 @@ import { MatchStatistic } from 'src/match_statistics/entities/match-statistic.en
 import { PhysicalEvaluation } from 'src/physical_evaluations/entities/physical-evaluation.entity'
 import { PositionWeightProfilesService } from 'src/position_weight_profiles/position-weight-profiles.service'
 import { SeasonsService } from 'src/seasons/seasons.service'
-import { TechnicalEvaluation } from 'src/technical_evaluations/entities/technical-evaluation.entity'
+import {
+  EvaluationDimension,
+  TechnicalEvaluation,
+} from 'src/technical_evaluations/entities/technical-evaluation.entity'
 import { TrainingLoad } from 'src/training_loads/entities/training-load.entity'
 import { TrainingSession } from 'src/training_sessions/entities/training-session.entity'
 import { UsersService } from 'src/users/users.service'
 import { extractErrorMessage } from 'src/common/utils/error-message.util'
+import { sportRules } from 'src/common/sport/sport-rules'
 import { FilterWeightedProgressIndexDto } from './dto/filter-weighted-progress-index.dto'
 import { ResponseWeightedProgressIndexDto } from './dto/response-weighted-progress-index.dto'
 import { WeightedProgressIndex } from './entities/weighted-progress-index.entity'
 import { ProgressIndexCalculatorService } from './progress-index-calculator.service'
-
-const STANDARD_MATCH_MINUTES = 90
 
 @Injectable()
 export class WeightedProgressIndexService {
@@ -250,8 +252,15 @@ export class WeightedProgressIndexService {
         where: { id_user, id_season },
       },
     )
+    const scoresOf = (dimension: EvaluationDimension) =>
+      technicalEvaluations
+        .filter((evaluation) => evaluation.dimension === dimension)
+        .map((evaluation) => Number(evaluation.score))
     const technical = this.progressIndexCalculatorService.computeTechnicalScore(
-      technicalEvaluations.map((e) => Number(e.score)),
+      {
+        technical: scoresOf(EvaluationDimension.TECNICA),
+        tactical: scoresOf(EvaluationDimension.TACTICA),
+      },
     )
 
     // --- Participation score: training attendance + match-minutes ratios ---
@@ -292,7 +301,8 @@ export class WeightedProgressIndexService {
         .getRawOne()
       matchRatio = Math.min(
         1,
-        Number(totalMinutes) / (seasonMatches.length * STANDARD_MATCH_MINUTES),
+        Number(totalMinutes) /
+          (seasonMatches.length * sportRules(category.sport).matchMinutes),
       )
     }
 

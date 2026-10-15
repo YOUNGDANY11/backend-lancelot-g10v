@@ -53,6 +53,19 @@ export class CreateMatchStatisticDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(30)
+  @ApiPropertyOptional({
+    example: 2,
+    default: 0,
+    description:
+      'Faltas cometidas. Es una métrica propia del fútbol sala, donde las faltas se acumulan por equipo y periodo',
+  })
+  fouls_committed?: number
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
   @Max(10)
   @ApiPropertyOptional({
     example: 7,
