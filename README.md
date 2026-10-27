@@ -128,7 +128,7 @@ El servidor crea roles faltantes al iniciar una base nueva; no ejecutes el SQL d
 
 ### Estructura
 
-`src/<módulo>/` agrupa controlador, servicio, DTO y entidad. Los módulos principales son autenticación y usuarios; categorías y temporadas; sesiones y cargas; salud y lesiones; alertas; talento; índice de progreso; informes y motor de análisis automático. `src/common/` reúne utilidades compartidas. `database/` contiene el SQL de normalización de roles. El detalle de entidades y módulos está en [`.claude/contexto/backend.md`](../.claude/contexto/backend.md).
+`src/<módulo>/` agrupa controlador, servicio, DTO y entidad. Los módulos principales son autenticación y usuarios; categorías y temporadas; sesiones y cargas; salud y lesiones; alertas; talento; índice de progreso; informes y motor de análisis automático. `src/common/` reúne utilidades compartidas. `database/` contiene el SQL de normalización de roles.
 
 ### Arquitectura de carpetas y archivos
 
